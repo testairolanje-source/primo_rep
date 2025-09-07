@@ -324,7 +324,7 @@
           else{
             lock=true;
             if(first.dataset.v === e){ first.classList.add('matched'); t.classList.add('matched'); matched+=2; showToast('Coppia trovata!'); first=null; lock=false; if(matched===items.length){ root.replaceChildren(successUI('Tutte le coppie abbinate!')); done('pairs'); } }
-            else{ wrongs++; playErrorTone(); setTimeout(()=>{ hide(first); hide(t); first=null; lock=false; showToast(`Sbagli: ${wrongs}/5`); if(wrongs>=5){ showToast('Hai sbagliato 5 volte — ricomincio il livello'); setTimeout(()=>{ root.innerHTML=''; return gamePairs(root, done); }, 400); } }, 700); }
+            else{ wrongs++; playErrorTone(); setTimeout(()=>{ hide(first); hide(t); first=null; lock=false; showToast(`Sbagli: ${wrongs}/5`); if(wrongs>=6){ showToast('Hai sbagliato 5 volte — ricomincio il livello'); setTimeout(()=>{ root.innerHTML=''; return gamePairs(root, done); }, 400); } }, 700); }
           }
         };
         hide(t); grid.appendChild(t);
