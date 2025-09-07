@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gratta e Vinci</title>
+<style>
+body {font-family: sans-serif; background: #0f172a; color: #f9fafb; display:flex; flex-direction:column; align-items:center; padding:20px;}
+h1 {text-align:center;}
+.legend {margin-bottom:20px;}
+.legend div {margin:4px 0;}
+.scratch-container {display:flex; flex-wrap:wrap; gap:16px; justify-content:center;}
+.scratch-wrapper {position:relative; width:100px; height:100px; border-radius:12px; overflow:hidden; cursor:pointer; border:2px solid #fff;}
+canvas {width:100%; height:100%; display:block;}
+.scratch-msg {position:absolute; inset:0; display:grid; place-items:center; font-size:18px; font-weight:bold; color:#fff;}
+#popup {position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:999;}
+#popup-content {background:#111; padding:24px; border-radius:12px; text-align:center;}
+#popup-content button {margin-top:16px; padding:12px 16px; border:none; border-radius:8px; background:#22c55e; color:#06111e; font-weight:bold; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<h1>Gratta e Vinci!</h1>
+
+<div class="legend">
+  <div>3 🍒 = 2€</div>
+  <div>3 🍓 = 5€</div>
+  <div>3 🍌 = 10€</div>
+  <div>3 💵 = 50€</div>
+  <div>3 👑 = 200€</div>
+  <div>3 💎 = PACCO MISTERIOSO</div>
+</div>
+
+<div class="scratch-container" id="scratchContainer">
+  <!-- I 10 gratta e vinci verranno generati qui -->
+</div>
+
+<div id="popup">
+  <div id="popup-content">
+    <h2>Hai vinto il PACCO MISTERIOSO!!!</h2>
+    <p>Clicca sul pulsante sotto per scoprire cosa contiene</p>
+    <button onclick="window.open('https://testairolanje-source.github.io/primo_rep/paccomisterioso','_blank')">Scopri il premio</button>
+  </div>
+</div>
+
+<script>
+const prizes = ["🍒","🍓","🍌","💵","👑","💎"];
+const scratchContainer = document.getElementById('scratchContainer');
+
+// Definiamo quali gratta e vinci sono vincenti e i simboli vincenti
+const winningSlots = {
+  3: ["🍌","🍌","🍌"],  // il 3° gratta e vinci
+  8: ["🍒","🍒","🍒"],  // l'8°
+  10:["💎","💎","💎"]   // l'ultimo
+};
+
+// Stato per controllo ordine
+let currentScratch = 1;
+
+function createScratch(id){
+  const wrapper = document.createElement('div');
+  wrapper.className = 'scratch-wrapper';
+  wrapper.dataset.id = id;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 100; canvas.height = 100;
+
+  const msg = document.createElement('div');
+  msg.className = 'scratch-msg';
+  // Messaggio nascosto finché non gratti
+  msg.textContent = "Gratta!";
+  wrapper.appendChild(canvas);
+  wrapper.appendChild(msg);
+  scratchContainer.appendChild(wrapper);
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = "#888";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  let scratching = false;
+
+  function scratch(x,y){
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI*2);
+    ctx.fill();
+    checkScratchCompletion();
+  }
+
+  function checkScratchCompletion(){
+    const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    const pixels = imageData.data;
+    let transparentCount = 0;
+    for(let i=3;i<pixels.length;i+=4){
+      if(pixels[i]<128) transparentCount++;
+    }
+    if(transparentCount > pixels.length*0.6){
+      revealPrize();
+    }
+  }
+
+  function revealPrize(){
+    // Impedisci di grattare di nuovo
+    canvas.remove();
+    // Determina simboli: vincenti o random
+    let symbols;
+    if(winningSlots[id]) symbols = winningSlots[id];
+    else {
+      // simboli casuali
+      symbols = Array.from({length:3},()=> prizes[Math.floor(Math.random()*prizes.length)]);
+    }
+    msg.textContent = symbols.join(" ");
+    if(id === 10) {
+      // mostra popup PACCO MISTERIOSO
+      document.getElementById('popup').style.display = 'flex';
+    }
+    currentScratch++;
+  }
+
+  // Eventi mouse
+  wrapper.addEventListener('mousedown', e=>{
+    if(id !== currentScratch) return alert("Devi grattare in ordine!");
+    scratching = true;
+  });
+  wrapper.addEventListener('mouseup', e=> scratching=false);
+  wrapper.addEventListener('mousemove', e=>{
+    if(!scratching) return;
+    const rect = canvas.getBoundingClientRect();
+    scratch(e.clientX-rect.left,e.clientY-rect.top);
+  });
+
+  // Touch support
+  wrapper.addEventListener('touchstart', e=>{
+    if(id !== currentScratch) { alert("Devi grattare in ordine!"); return;}
+    scratching = true;
+  });
+  wrapper.addEventListener('touchend', e=>scratching=false);
+  wrapper.addEventListener('touchmove', e=>{
+    if(!scratching) return;
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    scratch(touch.clientX-rect.left, touch.clientY-rect.top);
+  });
+}
+
+// crea 10 gratta e vinci
+for(let i=1;i<=10;i++){
+  createScratch(i);
+}
+</script>
+
+</body>
+</html>

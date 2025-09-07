@@ -189,9 +189,17 @@
     function unlockPrize(){
       const sec = document.getElementById('prizeSection');
       sec.classList.remove('hidden');
-      if(!state.prizeCode){ state.prizeCode = genPrizeCode(); localStorage.setItem('prizeCode', state.prizeCode); }
-      document.getElementById('prizeCode').textContent = state.prizeCode;
       diamondRain(220);
+      const prizeContainer = document.getElementById('prizeCode');
+      prizeContainer.innerHTML = ''; // pulisce eventuale codice
+      const link = document.createElement('a');
+      link.href = 'https://example.com/tuo-premio';  // <-- inserisci qui la tua URL
+      link.textContent = 'Clicca qui per riscattare il tuo premio!';
+      link.target = '_blank';
+      link.style.color = '#22c55e';
+      link.style.fontWeight = '700';
+      link.style.textDecoration = 'underline';
+      prizeContainer.appendChild(link);
     }
 
     function genPrizeCode(){ const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let out = 'WIN-'; for(let i=0;i<8;i++) out += alphabet[Math.floor(Math.random()*alphabet.length)]; return out; }
