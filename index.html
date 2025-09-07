@@ -222,6 +222,34 @@
     }
 
     // ========================= GIOCHI =======================================
+    function gameSnake(root,done){
+      const canvas=document.createElement('canvas');
+      canvas.width=400; canvas.height=400; canvas.className='snake';
+      root.appendChild(canvas);
+      const ctx=canvas.getContext('2d');
+      let snake=[{x:10,y:10}],dir={x:1,y:0},food=randPos(),size=20,len=5;
+      let loop=setInterval(tick,120);
+      document.onkeydown=e=>{
+      if(e.key==='ArrowUp'&&dir.y===0)dir={x:0,y:-1};
+      if(e.key==='ArrowDown'&&dir.y===0)dir={x:0,y:1};
+      if(e.key==='ArrowLeft'&&dir.x===0)dir={x:-1,y:0};
+      if(e.key==='ArrowRight'&&dir.x===0)dir={x:1,y:0};
+      };
+      function randPos(){return {x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}}
+      function tick(){
+      const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+      if(head.x<0||head.y<0||head.x>=20||head.y>=20||snake.some(s=>s.x===head.x&&s.y===head.y)){
+      clearInterval(loop); showToast('Game Over!'); root.innerHTML=''; gameSnake(root,done); return;
+      }
+      snake.unshift(head);
+      if(head.x===food.x&&head.y===food.y){ len++; food=randPos(); }
+      while(snake.length>len) snake.pop();
+      ctx.fillStyle='#000'; ctx.fillRect(0,0,400,400);
+      ctx.fillStyle='#22c55e'; snake.forEach(s=>ctx.fillRect(s.x*size,s.y*size,size-2,size-2));
+      ctx.fillStyle='#60a5fa'; ctx.fillText('💎',food.x*size+2,food.y*size+18);
+      if(len>=30){ clearInterval(loop); done('snake'); root.innerHTML='<h3>Snake completato!</h3>'; }
+      }
+    }
 
     function gameReflex(root, done){
       // 3 successi sotto soglia per completare; max 10 tentativi totali, al 10° fallimento si ricomincia il livello
