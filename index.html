@@ -307,10 +307,7 @@
 
     function gamePairs(root, done){
       // 16 coppie (32 tessere). max 5 errori, al 5° errore ricomincia il livello
-      const jewels = [
-        'Anello', 'Collana', 'Bracciale', 'Orecchini', 'Pendente', 'Fermaglio', 'Corona', 'Spilla',
-        'Gemelli', 'CoronaPiccola', 'Ciondolo', 'Tiara', 'Bangle', 'Medaglione', 'Anello2', 'Orecchino2'
-      ];
+      const jewels = ['💍','📿','📯','👑','💎','📌','📏','🎀'];
       const items = shuffle(jewels.concat(jewels));
       const grid = document.createElement('div'); grid.className='pairs';
       let first=null, lock=false, matched=0, wrongs=0;
