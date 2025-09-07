@@ -391,9 +391,9 @@
     function successUI(text){ const box=document.createElement('div'); box.style.display='grid'; box.style.placeItems='center'; box.style.gap='10px'; box.style.height='200px'; const h=document.createElement('div'); h.style.fontSize='18px'; h.style.fontWeight='800'; h.textContent=text; const b=document.createElement('div'); b.className='footer'; b.textContent='Puoi tornare alla lista livelli.'; box.append('✅', h, b); return box; }
 
     // placeholder snake (non modificato, rimane come demo)
-    function gameSnake(root, done){
-      const b = document.createElement('div'); b.style.padding='12px'; b.textContent='(Snake demo)'; const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Completa demo'; btn.onclick=()=>{ root.replaceChildren(successUI('Snake completato!')); done('snake'); }; b.appendChild(btn); root.appendChild(b);
-    }
+    //function gameSnake(root, done){
+    //  const b = document.createElement('div'); b.style.padding='12px'; b.textContent='(Snake demo)'; const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Completa demo'; btn.onclick=()=>{ root.replaceChildren(successUI('Snake completato!')); done('snake'); }; b.appendChild(btn); root.appendChild(b);
+    //}
 
     // copia codice
     document.getElementById('copyCodeBtn').addEventListener('click', async () => {
