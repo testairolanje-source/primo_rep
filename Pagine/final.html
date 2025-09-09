@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scegli il destino</title>
+  <style>
+    body {
+      background: white;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      margin: 20px;
+    }
+    .corner {
+      position: absolute;
+      width: 150px;
+    }
+    #top-left { top: 20px; left: 20px; }
+    #top-right { top: 20px; right: 20px; }
+    #bottom-left { bottom: 20px; left: 20px; }
+    #bottom-right { bottom: 20px; right: 20px; }
+    #spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50px;
+      height: 150px;
+      background: red;
+      transform-origin: bottom center;
+      transform: translate(-50%, -50%) rotate(0deg);
+      clip-path: polygon(50% 0%, 60% 100%, 40% 100%);
+      border-radius: 5px;
+    }
+    #chooseBtn {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      font-size: 18px;
+      cursor: pointer;
+      background: gold;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .diamond {
+      position: fixed;
+      top: -50px;
+      font-size: 24px;
+      color: deepskyblue;
+      animation: fall 3s linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Ero indeciso tra questi 4 quindi sarà il fato a scegliere per noi</h1>
+
+  <img id="top-left" class="corner" src="Assets/cuoremix.png">
+  <img id="top-right" class="corner" src="Assets/flomix.png">
+  <img id="bottom-left" class="corner" src="Assets/delimix.png">
+  <img id="bottom-right" class="corner" src="Assets/trilomix.png">
+
+  <div id="spinner"></div>
+  <button id="chooseBtn">Scegli per me</button>
+
+  <audio id="victorySound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
+
+  <script>
+    const spinner = document.getElementById("spinner");
+    const btn = document.getElementById("chooseBtn");
+    const sound = document.getElementById("victorySound");
+
+    btn.addEventListener("click", () => {
+      const spins = Math.floor(Math.random() * 4); // 0-3
+      const finalDeg = 360 * 5 + spins * 90 + (Math.random() * 30 - 15); 
+      spinner.style.transition = "transform 4s ease-out";
+      spinner.style.transform = `translate(-50%, -50%) rotate(${finalDeg}deg)`;
+
+      setTimeout(() => {
+        makeDiamonds();
+        sound.play();
+      }, 4200);
+    });
+
+    function makeDiamonds() {
+      for (let i = 0; i < 30; i++) {
+        const d = document.createElement("div");
+        d.className = "diamond";
+        d.style.left = Math.random() * 100 + "vw";
+        d.innerHTML = "💎";
+        document.body.appendChild(d);
+        setTimeout(() => d.remove(), 3000);
+      }
+    }
+  </script>
+</body>
+</html>
