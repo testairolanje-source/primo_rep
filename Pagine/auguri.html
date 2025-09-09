@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Forziere del Premio</title>
+<style>
+  body{margin:0;font-family:sans-serif;background:#0a0f1c;color:#fff;text-align:center;padding:20px}
+  h1{font-size:22px;margin-bottom:20px}
+
+  /* Forziere */
+  .chest{margin:40px auto;position:relative;width:260px;height:160px}
+  .base{width:100%;height:100px;background:#654321;border:4px solid #321;position:absolute;bottom:0;border-radius:0 0 8px 8px}
+  .lid{width:100%;height:80px;background:#8b4513;border:4px solid #321;position:absolute;top:0;border-radius:8px 8px 0 0;transform-origin:bottom center;transition:transform .6s}
+  .lock{width:40px;height:50px;background:gold;border:3px solid #b8860b;border-radius:8px;margin:auto;position:absolute;left:0;right:0;top:55px;cursor:pointer;transition:transform .5s}
+  .lock.open{transform:rotate(20deg) translateY(80px);opacity:0}
+
+  /* Fiches */
+  .chips{display:none;margin-top:20px;font-size:40px}
+  .chips span{margin:0 4px}
+
+  /* Slot machine */
+  .slot{display:none;margin-top:30px}
+  .reels{font-size:40px;display:flex;justify-content:center;gap:10px;margin:10px 0}
+  .credits{margin:8px 0;font-weight:bold}
+  button{padding:10px 16px;border:0;border-radius:8px;background:#ff6;color:#000;font-weight:bold;cursor:pointer}
+  button:disabled{opacity:0.6;cursor:not-allowed}
+
+  /* Diamanti che cadono */
+  .diamond{position:fixed;top:-40px;font-size:24px;animation:fall 3s linear forwards;z-index:100}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:0}}
+
+  /* Pulsante finale */
+  .final{display:none;margin-top:30px}
+</style>
+</head>
+<body>
+  <h1>Ce l'hai fatta, ti sei guadagnata il premio che meriti, non ti rimane che aprire il forziere!</h1>
+
+  <div class="chest">
+    <div class="lid" id="lid"></div>
+    <div class="base"></div>
+    <div class="lock" id="lock"></div>
+  </div>
+
+  <div class="chips" id="chips">
+    <p>💙💙💙💙💙💙💙💙</p>
+    <p>💙💙💙💙💙💙💙💙</p>
+  </div>
+
+  <div id="prizeText" style="display:none;margin-top:20px;font-size:18px">
+    Il premio che ti meriti è questo! Fiche da casinò, per continuare il gioco d'azzardo che tanto ami.
+  </div>
+
+  <div class="slot" id="slot">
+    <div class="credits" id="credits">Crediti: 19091984</div>
+    <div class="reels" id="reels">🎰 🎰 🎰</div>
+    <button id="spinBtn">Gira la slot (-10)</button>
+  </div>
+
+  <div class="final" id="finalBtn">
+    <button onclick="location.href='https://testairolanje-source.github.io/primo_rep/Pagine/auguri'">
+      Prosegui al premio finale
+    </button>
+  </div>
+
+<script>
+let clickCount=0;
+const lock=document.getElementById('lock');
+const lid=document.getElementById('lid');
+const chips=document.getElementById('chips');
+const prizeText=document.getElementById('prizeText');
+const slot=document.getElementById('slot');
+const reels=document.getElementById('reels');
+const credits=document.getElementById('credits');
+const spinBtn=document.getElementById('spinBtn');
+const finalBtn=document.getElementById('finalBtn');
+
+lock.addEventListener('click',()=>{
+  clickCount++;
+  if(clickCount===1){ lid.style.transform='rotate(-10deg)'; setTimeout(()=>lid.style.transform='rotate(0)',600); }
+  if(clickCount===2){ lid.style.transform='rotate(-20deg)'; setTimeout(()=>lid.style.transform='rotate(0)',700); }
+  if(clickCount===3){
+    lock.classList.add('open');
+    lid.style.transform='rotate(-70deg)';
+    setTimeout(()=>{
+      chips.style.display='block';
+      prizeText.style.display='block';
+      slot.style.display='block';
+    },700);
+  }
+});
+
+let credit=19091984;
+let spins=0;
+const SYMBOLS=['🍒','🍋','🍊','🍉','7️⃣','⭐','💎'];
+
+spinBtn.addEventListener('click',()=>{
+  if(credit<10) return;
+  credit-=10; spins++;
+  credits.textContent='Crediti: '+credit;
+  let r1=SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+  let r2=SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+  let r3=SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+  if(spins===7){ r1=r2=r3='💎'; jackpot(); }
+  reels.textContent=r1+' '+r2+' '+r3;
+});
+
+function jackpot(){
+  // diamanti che piovono
+  for(let i=0;i<40;i++){
+    const d=document.createElement('div');
+    d.className='diamond'; d.textContent='💎';
+    d.style.left=Math.random()*100+'%';
+    d.style.fontSize=(18+Math.random()*22)+'px';
+    d.style.animationDuration=(2+Math.random()*2)+'s';
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),4000);
+  }
+  // musica semplice con beep
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  [440,660,880,660,440].forEach((f,i)=>{
+    const o=ctx.createOscillator(); const g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value=f; o.start(ctx.currentTime+i*0.4); o.stop(ctx.currentTime+i*0.4+0.3);
+  });
+  // mostra pulsante finale
+  setTimeout(()=>finalBtn.style.display='block',5000);
+}
+</script>
+</body>
+</html>
