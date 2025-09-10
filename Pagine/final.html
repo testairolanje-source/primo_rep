@@ -85,7 +85,7 @@
 
     btn.addEventListener("click", () => {
       const spins = Math.floor(Math.random() * 4); // 0-3
-      const finalDeg = 360 * 5 + spins * 90 + (Math.random() * 30 - 15); 
+      const finalDeg = 360 * 5 + spins * 90 + 45; 
       spinner.style.transition = "transform 4s ease-out";
       spinner.style.transform = `translate(-50%, -50%) rotate(${finalDeg}deg)`;
 
