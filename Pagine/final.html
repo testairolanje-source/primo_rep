@@ -152,7 +152,7 @@
 
         setTimeout(() => { // Give a small delay to apply initial rotation before starting full spin
           const spins = Math.floor(Math.random() * 4); // 0-3 giri aggiuntivi per la trottola
-          const targetQuadrantIndex = Math.floor(Math.random() * 4); // 0-3, l'indice dell'angolo vincente
+          const targetQuadrantIndex = initialRotation/90; // 0-3, l'indice dell'angolo vincente
           const rotationOffset = 45; // Angolo per puntare al centro del quadrante (90/2)
 
           // Calcola l'angolo finale:
