@@ -1,149 +1,411 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Cruciverba Interattivo</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f5f5f5;
-    }
-    h1 { margin: 20px; }
-    #crossword {
-      display: grid;
-      grid-template-columns: repeat(15, 30px);
-      grid-template-rows: repeat(15, 30px);
-      margin: 20px auto;
-      gap: 2px;
-    }
-    .cell {
-      width: 30px;
-      height: 30px;
-      background: black;
-    }
-    .input-cell {
-      background: white;
-      text-transform: uppercase;
-      text-align: center;
-      font-size: 18px;
-      border: 1px solid #ccc;
-    }
-    .wrong {
-      background: #ffb3b3 !important;
-    }
-    #message {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    #next-btn {
-      display: none;
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    #options {
-      margin-top: 15px;
-      display: none;
-    }
-    button.option {
-      margin: 5px;
-      padding: 8px 15px;
-      font-size: 14px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .manual { background: #007bff; color: white; }
-    .highlight { background: #ffc107; color: black; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cruciverba Gigante</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --text: #e5e7eb;
+            --soft: #9ca3af;
+            --primary: #22c55e;
+            --accent: #60a5fa;
+            --danger: #ef4444;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0,0,0,.35);
+        }
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+            background: radial-gradient(1200px 800px at 80% -10%, #1e293b 0, transparent 60%), radial-gradient(1000px 600px at -10% 110%, #111827 0, transparent 60%), var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: var(--primary);
+            font-size: clamp(24px, 5vw, 48px);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            max-width: 1400px;
+            width: 100%;
+            justify-content: center;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-auto-rows: 1fr;
+            border: 2px solid var(--soft);
+            box-shadow: var(--shadow);
+            border-radius: var(--radius);
+            max-width: 800px;
+            flex-grow: 1;
+            aspect-ratio: 1/1;
+        }
+        .cell {
+            position: relative;
+            background-color: #333;
+            border: 1px solid #1a1a1a;
+            color: var(--text);
+            font-size: clamp(0.6rem, 1.5vw, 1.2rem);
+            font-weight: bold;
+            display: grid;
+            place-items: center;
+            text-transform: uppercase;
+        }
+        .cell.word {
+            background-color: #fff;
+            color: #000;
+        }
+        .cell.selected {
+            background-color: var(--accent);
+            color: #fff;
+        }
+        .cell.highlighted {
+            background-color: #60a5fa50;
+        }
+        .cell.selected, .cell.highlighted {
+            border: 1px solid var(--accent);
+        }
+        .cell.word.selected {
+            background-color: var(--accent);
+            color: #fff;
+        }
+        .cell.word.highlighted {
+            background-color: #60a5fa;
+        }
+        .number {
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            font-size: 0.5em;
+            color: #555;
+            font-weight: normal;
+        }
+        .clues {
+            flex-basis: 350px;
+            background: #1e293b;
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        .clues h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        .clues ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .clues li {
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .clues li.selected {
+            font-weight: bold;
+            color: var(--accent);
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .btn {
+            background-color: var(--accent);
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: var(--shadow);
+        }
+    </style>
 </head>
 <body>
-  <h1>Cruciverba</h1>
-  <div id="crossword"></div>
-  <div id="message"></div>
-  <div id="options">
-    <button class="option manual">Correggi da solo</button>
-    <button class="option highlight">Evidenzia errori</button>
-  </div>
-  <button id="next-btn">Prosegui</button>
+    <h1>Cruciverba Gigante</h1>
+    <div class="container">
+        <div class="grid-container" id="crossword-grid"></div>
+        <div class="clues">
+            <h2 id="clues-title">Definizioni</h2>
+            <ul id="clues-list"></ul>
+        </div>
+    </div>
+    <div class="controls">
+        <button id="switch-direction-btn" class="btn">Cambia Direzione</button>
+    </div>
 
-  <script>
-    // Schema cruciverba (B = blocco, lettere = soluzione)
-    const solution = [
-      "BIBLIOTECABBBBBB",
-      "B..............B",
-      "I..TEATRO......I",
-      "B..A...........B",
-      "L..MUSEO.......L",
-      "I..............I",
-      "O..PIAZZA......O",
-      "T..............T",
-      "E..SCUOLA......E",
-      "C..............C",
-      "A..CITTA.......A",
-      "B..............B",
-      "BBBBBBBBBBBBBBBB",
-      "BBBBBBBBBBBBBBBB",
-      "BBBBBBBBBBBBBBBB"
-    ];
+    <script>
+        const GRID_SIZE = 20;
+        const words = {
+            "albero": { across: 2, down: 4, clue: "Grande pianta con tronco, rami e foglie." },
+            "sole": { across: 5, down: 1, clue: "Stella al centro del nostro sistema solare." },
+            "mare": { across: 6, down: 5, clue: "Vasta distesa di acqua salata." },
+            "treno": { across: 7, down: 9, clue: "Mezzo di trasporto che viaggia su binari." },
+            "neve": { across: 10, down: 12, clue: "Acqua ghiacciata che cade dal cielo." },
+            "cuore": { across: 13, down: 15, clue: "Organo che pompa il sangue nel corpo." },
+            "gatto": { across: 14, down: 18, clue: "Animale domestico che fa le fusa." },
+            "lago": { across: 16, down: 20, clue: "Vasta massa d'acqua dolce circondata da terra." },
+            "mela": { across: 1, down: 2, clue: "Frutto rosso o verde molto comune." },
+            "libro": { across: 3, down: 6, clue: "Insieme di pagine stampate rilegate." },
+            "sasso": { across: 4, down: 8, clue: "Pietra di piccole dimensioni." },
+            "luna": { across: 8, down: 10, clue: "Satellite naturale della Terra." },
+            "citta": { across: 9, down: 11, clue: "Grande centro abitato." },
+            "casa": { across: 11, down: 13, clue: "Abitazione, dimora." },
+            "rosa": { across: 12, down: 14, clue: "Fiore spinoso molto profumato." },
+            "pesce": { across: 15, down: 17, clue: "Animale che vive in acqua e respira con le branchie." },
+            "ponte": { across: 17, down: 19, clue: "Struttura che unisce due sponde di un fiume." },
+            "vento": { across: 18, down: 1, clue: "Aria in movimento." },
+            "mano": { across: 19, down: 3, clue: "Parte del corpo che serve per afferrare." },
+            "gioco": { across: 20, down: 7, clue: "Attività ricreativa o sportiva." },
+            "fuoco": { across: 21, down: 22, clue: "Fenomeno di combustione con fiamme." },
+            "nave": { across: 22, down: 24, clue: "Grande imbarcazione." },
+            "pane": { across: 23, down: 25, clue: "Alimento base ricavato dalla farina." },
+            "sale": { across: 24, down: 26, clue: "Condimento che si ottiene dall'acqua di mare." },
+            "cielo": { across: 25, down: 27, clue: "La volta celeste." },
+            "erba": { across: 26, down: 28, clue: "Pianta di colore verde che ricopre i prati." },
+            "moto": { across: 27, down: 29, clue: "Veicolo a due ruote con motore." },
+            "palla": { across: 28, down: 30, clue: "Oggetto sferico usato in molti sport." },
+            "gelo": { across: 29, down: 31, clue: "Freddo intenso." },
+            "nido": { across: 30, down: 32, clue: "Dimora costruita dagli uccelli." },
+            "gola": { across: 31, down: 33, clue: "Parte anteriore del collo." },
+            "pianto": { across: 32, down: 34, clue: "Manifestazione di tristezza con lacrime." },
+            "torta": { across: 33, down: 35, clue: "Dolce preparato al forno." },
+            "dito": { across: 34, down: 36, clue: "Parte terminale della mano." },
+            "onda": { across: 35, down: 37, clue: "Movimento del mare." },
+            "porto": { across: 36, down: 38, clue: "Luogo dove attraccano le navi." },
+            "luce": { across: 37, down: 39, clue: "Energia che rende visibile gli oggetti." },
+            "miele": { across: 38, down: 40, clue: "Sostanza zuccherina prodotta dalle api." },
+            "bocca": { across: 39, down: 21, clue: "Parte del corpo usata per parlare e mangiare." },
+            "soleil": { across: 40, down: 23, clue: "Sole in francese." },
+            "tazza": { across: 41, down: 42, clue: "Recipiente per bere il caffè." },
+            "sedia": { across: 42, down: 43, clue: "Mobili per sedersi." },
+            "fiori": { across: 43, down: 44, clue: "Parte colorata e profumata di una pianta." },
+            "scudo": { across: 44, down: 45, clue: "Arma difensiva usata in passato." },
+            "campo": { across: 45, down: 46, clue: "Terreno coltivato." }
+        };
 
-    const crossword = document.getElementById("crossword");
-    const size = solution.length;
+        let grid = [];
+        let clueData = {};
+        let selectedCell = null;
+        let selectedDirection = "across";
+        const gridContainer = document.getElementById('crossword-grid');
+        const cluesList = document.getElementById('clues-list');
+        const switchDirectionBtn = document.getElementById('switch-direction-btn');
 
-    // Crea griglia
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        const ch = solution[r][c];
-        if (ch === "B") {
-          const div = document.createElement("div");
-          div.className = "cell";
-          crossword.appendChild(div);
-        } else {
-          const input = document.createElement("input");
-          input.maxLength = 1;
-          input.className = "input-cell";
-          input.dataset.row = r;
-          input.dataset.col = c;
-          crossword.appendChild(input);
+        function generateGrid() {
+            grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(' '));
+            clueData = {};
+            let clueNumber = 1;
+
+            // Simple layout logic for demonstration
+            let row = 0;
+            let col = 0;
+
+            for (const word in words) {
+                const len = word.length;
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 100) {
+                    const startRow = Math.floor(Math.random() * GRID_SIZE);
+                    const startCol = Math.floor(Math.random() * GRID_SIZE);
+                    const isAcross = Math.random() < 0.5;
+
+                    if (isAcross) {
+                        if (startCol + len <= GRID_SIZE) {
+                            let canPlace = true;
+                            for (let i = 0; i < len; i++) {
+                                if (grid[startRow][startCol + i] !== ' ' && grid[startRow][startCol + i] !== word[i]) {
+                                    canPlace = false;
+                                    break;
+                                }
+                            }
+                            if (canPlace) {
+                                for (let i = 0; i < len; i++) {
+                                    grid[startRow][startCol + i] = word[i];
+                                }
+                                clueData[word] = {
+                                    start: [startRow, startCol],
+                                    direction: 'across',
+                                    clue: words[word].clue,
+                                    number: clueNumber
+                                };
+                                placed = true;
+                                clueNumber++;
+                            }
+                        }
+                    } else { // down
+                        if (startRow + len <= GRID_SIZE) {
+                            let canPlace = true;
+                            for (let i = 0; i < len; i++) {
+                                if (grid[startRow + i][startCol] !== ' ' && grid[startRow + i][startCol] !== word[i]) {
+                                    canPlace = false;
+                                    break;
+                                }
+                            }
+                            if (canPlace) {
+                                for (let i = 0; i < len; i++) {
+                                    grid[startRow + i][startCol] = word[i];
+                                }
+                                clueData[word] = {
+                                    start: [startRow, startCol],
+                                    direction: 'down',
+                                    clue: words[word].clue,
+                                    number: clueNumber
+                                };
+                                placed = true;
+                                clueNumber++;
+                            }
+                        }
+                    }
+                    attempts++;
+                }
+            }
         }
-      }
-    }
 
-    function checkCrossword(highlight=false) {
-      let correct = true;
-      document.querySelectorAll(".input-cell").forEach(input => {
-        const r = input.dataset.row;
-        const c = input.dataset.col;
-        const expected = solution[r][c];
-        const val = input.value.toUpperCase();
-        if (val !== expected) {
-          correct = false;
-          if (highlight) input.classList.add("wrong");
-          else input.classList.remove("wrong");
-        } else {
-          input.classList.remove("wrong");
+        function renderGrid() {
+            gridContainer.innerHTML = '';
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (grid[r][c] !== ' ') {
+                        cell.classList.add('word');
+                        cell.dataset.row = r;
+                        cell.dataset.col = c;
+                        cell.innerHTML = '<input type="text" maxlength="1" oninput="this.value = this.value.toUpperCase()">';
+                    } else {
+                        cell.classList.add('blank');
+                    }
+                    gridContainer.appendChild(cell);
+                }
+            }
         }
-      });
-      if (correct) {
-        document.getElementById("message").textContent = "🎉 Complimenti! Cruciverba completato!";
-        document.getElementById("options").style.display = "none";
-        document.getElementById("next-btn").style.display = "inline-block";
-      } else {
-        document.getElementById("message").textContent = "❌ Ci sono errori!";
-        document.getElementById("options").style.display = "block";
-        document.getElementById("next-btn").style.display = "none";
-      }
-    }
 
-    // Controllo quando tutti i campi sono riempiti
-    document.querySelectorAll(".input-cell").forEach(input => {
-      input.addEventListener("input", () => {
-        const allFilled = [...document.querySelectorAll(".input-cell")]
-          .every(cell => cell
+        function renderClues() {
+            cluesList.innerHTML = '';
+            const allClues = Object.values(clueData).sort((a, b) => a.number - b.number);
+            allClues.forEach(clue => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${clue.number}.</strong> ${clue.clue} (${clue.direction === 'across' ? 'orizzontale' : 'verticale'})`;
+                li.dataset.number = clue.number;
+                li.dataset.direction = clue.direction;
+                cluesList.appendChild(li);
+            });
+        }
+
+        function getCell(row, col) {
+            return gridContainer.children[row * GRID_SIZE + col];
+        }
+
+        function highlightWord(cell) {
+            document.querySelectorAll('.cell.highlighted, .cell.selected').forEach(c => {
+                c.classList.remove('highlighted');
+                c.classList.remove('selected');
+            });
+            if (!cell || !cell.classList.contains('word')) return;
+
+            const r = parseInt(cell.dataset.row);
+            const c = parseInt(cell.dataset.col);
+            let wordFound = false;
+
+            // Check across
+            let acrossWord = Object.values(clueData).find(clue => {
+                const startRow = clue.start[0];
+                const startCol = clue.start[1];
+                if (clue.direction === 'across' && r === startRow && c >= startCol && c < startCol + grid[r][c].length) {
+                    return true;
+                }
+                return false;
+            });
+
+            if (acrossWord) {
+                for (let i = acrossWord.start[1]; i < acrossWord.start[1] + Object.keys(words).find(key => words[key].clue === acrossWord.clue).length; i++) {
+                    const cellToHighlight = getCell(acrossWord.start[0], i);
+                    if (cellToHighlight) cellToHighlight.classList.add('highlighted');
+                }
+                wordFound = true;
+            }
+
+            // Check down
+            let downWord = Object.values(clueData).find(clue => {
+                const startRow = clue.start[0];
+                const startCol = clue.start[1];
+                if (clue.direction === 'down' && c === startCol && r >= startRow && r < startRow + grid[r][c].length) {
+                    return true;
+                }
+                return false;
+            });
+            if (downWord) {
+                for (let i = downWord.start[0]; i < downWord.start[0] + Object.keys(words).find(key => words[key].clue === downWord.clue).length; i++) {
+                    const cellToHighlight = getCell(i, downWord.start[1]);
+                    if (cellToHighlight) cellToHighlight.classList.add('highlighted');
+                }
+                wordFound = true;
+            }
+        }
+
+        function setupEventListeners() {
+            gridContainer.addEventListener('click', (e) => {
+                const cell = e.target.closest('.cell.word');
+                if (cell) {
+                    selectedCell = cell;
+                    highlightWord(cell);
+                    cell.classList.add('selected');
+                }
+            });
+
+            cluesList.addEventListener('click', (e) => {
+                const li = e.target.closest('li');
+                if (li) {
+                    document.querySelectorAll('.clues li.selected').forEach(item => item.classList.remove('selected'));
+                    li.classList.add('selected');
+
+                    const direction = li.dataset.direction;
+                    const number = parseInt(li.dataset.number);
+                    const wordData = Object.values(clueData).find(clue => clue.number === number && clue.direction === direction);
+
+                    if (wordData) {
+                        const startCell = getCell(wordData.start[0], wordData.start[1]);
+                        if (startCell) {
+                            highlightWord(startCell);
+                            startCell.classList.add('selected');
+                        }
+                    }
+                }
+            });
+        }
+        
+        // This is a simplified way to add numbers. For a real large-scale crossword, this logic would be more complex
+        function addNumbersToGrid() {
+            Object.values(clueData).forEach(data => {
+                const cell = getCell(data.start[0], data.start[1]);
+                if(cell) {
+                    const numSpan = document.createElement('span');
+                    numSpan.className = 'number';
+                    numSpan.textContent = data.number;
+                    cell.appendChild(numSpan);
+                }
+            });
+        }
+
+        generateGrid();
+        renderGrid();
+        renderClues();
+        addNumbersToGrid();
+        setupEventListeners();
+
+    </script>
+</body>
+</html>
