@@ -126,9 +126,8 @@
         <section class="card hidden" id="prizeSection" style="margin-top:16px">
             <h2>🎉 Premio sbloccato!</h2>
             <div class="prize">
-                <p>Congratulazioni! Hai completato tutti i livelli. Ecco il tuo codice premio:</p>
-                <div class="code" id="prizeCode" aria-live="polite"></div>
-                <button class="btn" id="copyCodeBtn">Copia Codice</button>
+                <p>Congratulazioni! Hai completato tutti i livelli. Ora puoi proseguire la tua avventura:</p>
+                <button class="btn" id="continueAdventureBtn">Prosegui la tua avventura!</button>
                 <small class="footer">Suggerimento: Personalizza il testo del premio o collega un form per riscattarlo.</small>
             </div>
         </section>
@@ -208,24 +207,10 @@
         function unlockPrize(){
             const sec = document.getElementById('prizeSection');
             sec.classList.remove('hidden');
-            diamondRain(220);
-            const prizeContainer = document.getElementById('prizeCode');
-            prizeContainer.innerHTML = ''; // pulisce eventuale codice
-            const link = document.createElement('a');
-            link.href = 'https://testairolanje-source.github.io/primo_rep/Pagine/gratta'; // <-- inserisci qui la tua URL
-            link.textContent = 'Clicca qui per riscattare il tuo premio!';
-            link.target = '_blank';
-            link.style.color = '#22c55e';
-            link.style.fontWeight = '700';
-            link.style.textDecoration = 'underline';
-            prizeContainer.appendChild(link);
+            diamondRain(220); // Avvia la pioggia di diamanti
         }
 
-        function genPrizeCode(){ const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let out = 'WIN-'; for(let i=0;i<8;i++) out += alphabet[Math.floor(Math.random()*alphabet.length)]; return out; }
-
-        const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
-        function playErrorTone(){ if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sawtooth'; o.frequency.value=220; g.gain.value=0.0001; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.01); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25); setTimeout(()=>{ o.stop(); }, 300); }
-
+        // Funzione modificata per la pioggia di diamanti (un solo colore)
         function diamondRain(n=80){
             for(let i=0;i<n;i++){
                 const s = document.createElement('div');
@@ -234,8 +219,8 @@
                 const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width','14'); svg.setAttribute('height','18'); svg.setAttribute('viewBox','0 0 14 18');
                 const path = document.createElementNS('http://www.w3.org/2000/svg','polygon');
                 path.setAttribute('points','7,0 14,6 7,18 0,6');
-                const hue = Math.floor(Math.random()*360);
-                path.setAttribute('fill',`hsl(${hue} 80% 60%)`);
+                // Colore fisso per i diamanti (ad esempio, il blu dell'accento)
+                path.setAttribute('fill','var(--accent)');
                 svg.appendChild(path);
                 s.appendChild(svg);
                 document.body.appendChild(s);
@@ -247,6 +232,11 @@
                 ], { duration, easing:'cubic-bezier(.2,.8,.2,1)' }).addEventListener('finish', ()=> s.remove());
             }
         }
+
+
+        const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
+        function playErrorTone(){ if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sawtooth'; o.frequency.value=220; g.gain.value=0.0001; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.01); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25); setTimeout(()=>{ o.stop(); }, 300); }
+
 
         // ========================= GIOCHI =======================================
         function gameSnake(root, done){
@@ -261,8 +251,7 @@
             const controls = document.createElement('div');
             controls.className = 'snake-controls';
             controls.innerHTML = `
-                <button class="btn" id="snakeLeftBtn">⬅️ Sinistra</button>
-                <button class="btn" id="snakeRightBtn">➡️ Destra</button>
+                <button class="btn" id="snakeTurnBtn">Gira</button>
             `;
             root.appendChild(controls);
 
@@ -272,10 +261,8 @@
 
             let snake = [{x: 10, y: 10}];
             let food = generateFood();
-            let direction = {x: 1, y: 0};
-            let lastMoveTime = 0;
-            const moveInterval = 100;
-            const targetLength = 30;
+            let direction = {x: 1, y: 0}; // Inizia andando a destra
+            let targetLength = 30;
 
             function generateFood() {
                 let newFood;
@@ -289,16 +276,17 @@
             }
 
             function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Pulisce il canvas
                 ctx.fillStyle = '#0b1220';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = '#22c55e';
+                ctx.fillStyle = '#22c55e'; // Colore della serpe
                 snake.forEach(segment => {
                     ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize - 2, tileSize - 2);
                 });
 
-                ctx.fillStyle = '#60a5fa';
-                ctx.font = '20px sans-serif';
+                ctx.fillStyle = '#60a5fa'; // Colore del diamante
+                ctx.font = `${tileSize * 0.8}px serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('💎', food.x * tileSize + tileSize / 2, food.y * tileSize + tileSize / 2);
@@ -371,22 +359,20 @@
             }
             document.addEventListener('keydown', handleKeyDown);
 
-            // Gestione input touch
-            function handleTouchTurn(turnDir) {
+            // Gestione input touch (pulsante "Gira")
+            document.getElementById('snakeTurnBtn').onclick = () => {
                 const { x, y } = direction;
-                if (turnDir === 'left') {
-                    if (x !== 0) direction = { x: 0, y: -x };
-                    else direction = { x: y, y: 0 };
-                } else if (turnDir === 'right') {
-                    if (x !== 0) direction = { x: 0, y: x };
-                    else direction = { x: -y, y: 0 };
-                }
-            }
-            document.getElementById('snakeLeftBtn').onclick = () => handleTouchTurn('left');
-            document.getElementById('snakeRightBtn').onclick = () => handleTouchTurn('right');
+                // Ruota di 90 gradi in senso orario
+                if (x === 1 && y === 0) direction = { x: 0, y: 1 };   // Destra -> Giù
+                else if (x === 0 && y === 1) direction = { x: -1, y: 0 }; // Giù -> Sinistra
+                else if (x === -1 && y === 0) direction = { x: 0, y: -1 };// Sinistra -> Su
+                else if (x === 0 && y === -1) direction = { x: 1, y: 0 };  // Su -> Destra
+            };
 
-            gameLoop = setInterval(update, 100);
 
+            const gameLoop = setInterval(update, 100);
+
+            // Cleanup alla fine del gioco
             const observer = new MutationObserver(mutationsList => {
                 for(const mutation of mutationsList) {
                     if (mutation.removedNodes.length > 0) {
@@ -563,13 +549,13 @@
         // utility
         function successUI(text){ const box=document.createElement('div'); box.style.display='grid'; box.style.placeItems='center'; box.style.gap='10px'; box.style.height='200px'; const h=document.createElement('div'); h.style.fontSize='18px'; h.style.fontWeight='800'; h.textContent=text; const b=document.createElement('div'); b.className='footer'; b.textContent='Puoi tornare alla lista livelli.'; box.append('✅', h, b); return box; }
 
-        // copia codice
-        document.getElementById('copyCodeBtn').addEventListener('click', async () => {
-            const code = document.getElementById('prizeCode').textContent;
-            if(!code) return;
-            try{ await navigator.clipboard.writeText(code); showToast('Codice copiato!'); }
-            catch{ showToast('Impossibile copiare automaticamente.'); }
+        // Gestione del pulsante "Prosegui la tua avventura!"
+        document.getElementById('prizeSection').addEventListener('click', (event) => {
+            if (event.target && event.target.id === 'continueAdventureBtn') {
+                window.open('https://testairolanje-source.github.io/primo_rep/Pagine/gratta', '_blank');
+            }
         });
+
 
         // init
         renderLevels(); updateProgressUI(); if(state.completed.length === LEVELS.length) unlockPrize();
