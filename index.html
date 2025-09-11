@@ -146,13 +146,15 @@
             prizeCode: localStorage.getItem('prizeCode') || null,
         };
 
+        
         const LEVELS = [
             { id: 'snake', name: 'Livello 1 · Snake Diamanti', desc: 'Mangia i diamanti fino a lunghezza 30.', icon: '🐍', run: gameSnake },
-            { id: 'simon', name: 'Livello 2 · Simon 5', desc: 'Ripeti la sequenza di 5 lampeggi.', icon: '🧠', run: gameSimon },
+            { id: 'simon', name: 'Livello 2 · Simon Marathon', desc: 'Supera 7 sequenze (da 4 a 10 passi).', icon: '🧠', run: gameSimon },
             { id: 'reflex', name: 'Livello 3 · Reflex Rush', desc: 'Reagisci al segnale in meno di 400ms, 3 volte (max 10 tentativi).', icon: '⚡', run: gameReflex },
             { id: 'pairs', name: 'Livello 4 · Memory', desc: 'Abbina tutte le coppie di oggetti preziosi (8 coppie).', icon: '💎', run: gamePairs },
-            { id: 'quiz',  name: 'Prova Finale · Quick Quiz', desc: 'Rispondi correttamente alle domande.', icon: '❓', run: () => window.location.href = 'quiz.html' },
+            { id: 'lingo', name: 'Prova Finale · Lingo', desc: 'Indovina 4 parole crescenti (5→8 lettere).', icon: '🔤', run: gameLingo },
         ];
+
 
         function saveProgress(){ localStorage.setItem('completedLevels', JSON.stringify(state.completed)); }
         function showToast(text){
@@ -444,47 +446,84 @@
         }
 
         function gameSimon(root, done){
-            const n = 5; const seq = Array.from({length:n}, ()=> Math.floor(Math.random()*4));
-            let playing=false; let input=[];
+            let level = 0; // da 0 a 6 → lunghezze 4..10
+            let seq = [];
+            let input = [];
+            let playing = false;
+
             const wrap = document.createElement('div');
             const info = document.createElement('div'); info.className='footer';
             const grid = document.createElement('div'); grid.className='simon';
-            const pads = [0,1,2,3].map(i=>{ const d=document.createElement('div'); d.className='pad p'+i; d.setAttribute('role','button'); d.setAttribute('aria-label','Pad '+i); d.onclick=()=>press(i); grid.appendChild(d); return d; });
+            const pads = [0,1,2,3].map(i=>{
+                const d=document.createElement('div');
+                d.className='pad p'+i;
+                d.onclick=()=>press(i);
+                grid.appendChild(d);
+                return d;
+            });
             const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Mostra Sequenza';
-            wrap.append(btn, info, grid); root.appendChild(wrap);
+            wrap.append(btn, info, grid);
+            root.appendChild(wrap);
+
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const frequencies = [261.6, 329.6, 392.0, 523.3];
-            function playTone(i, duration=0.3){
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.frequency.value = frequencies[i];
-                osc.type = 'sine';
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
+
+            function playTone(i,duration=0.3){
+                const osc=audioCtx.createOscillator();
+                const gain=audioCtx.createGain();
+                osc.frequency.value=frequencies[i]; osc.connect(gain); gain.connect(audioCtx.destination);
+                gain.gain.setValueAtTime(0.2,audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime+duration);
             }
-            function playErrorTone(){
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.frequency.value = 120;
-                osc.type = 'sawtooth';
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.5);
+            function playErrorTone(){ const osc=audioCtx.createOscillator(); osc.frequency.value=120; osc.type='sawtooth'; osc.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime+0.4); }
+
+            function flash(i){
+                pads[i].classList.add('active');
+                playTone(i);
+                setTimeout(()=>pads[i].classList.remove('active'),450);
             }
 
-            function flash(i){ pads[i].classList.add('active'); playTone(i); setTimeout(()=> pads[i].classList.remove('active'), 450); }
-            function play(){ playing=true; input=[]; info.textContent='Osserva…'; btn.disabled=true; let t=0; seq.forEach((v,idx)=> setTimeout(()=>{ flash(v); if(idx===seq.length-1){ setTimeout(()=>{ playing=false; info.textContent='Tocca a te!'; }, 450); } }, t+=700)); }
-            function press(i){ if(playing || btn.disabled!==true) return; playTone(i); input.push(i); const correctSoFar = input.every((v,k)=> v===seq[k]); if(!correctSoFar){ playErrorTone(); showToast('Sequenza errata — riparti');
-                setTimeout(()=>{ root.innerHTML=''; return gameSimon(root, done); }, 500); return; }
-                if(input.length===seq.length){ info.textContent='Ben fatto!'; diamondRain(120); wrap.replaceChildren(successUI('Sequenza corretta!')); done('simon'); }
+            function startRound(){
+                const length = 4 + level; // sequenza da 4..10
+                seq = Array.from({length}, ()=> Math.floor(Math.random()*4));
+                input = [];
+                info.textContent=`Round ${level+1}/7: Osserva…`;
+                btn.disabled=true;
+                let t=0;
+                seq.forEach((v,idx)=>setTimeout(()=>{
+                    flash(v);
+                    if(idx===seq.length-1) setTimeout(()=>{
+                        playing=false; info.textContent='Tocca a te!';
+                    },500);
+                },t+=700));
             }
 
-            btn.onclick = play;
+            function press(i){
+                if(playing || btn.disabled!==true) return;
+                playTone(i);
+                input.push(i);
+                const correctSoFar = input.every((v,k)=> v===seq[k]);
+                if(!correctSoFar){
+                    playErrorTone();
+                    showToast('Errore! Ricominci dal primo round.');
+                    level=0;
+                    setTimeout(()=>{startRound();},800);
+                    return;
+                }
+                if(input.length===seq.length){
+                    level++;
+                    if(level>=7){
+                        diamondRain(140);
+                        wrap.replaceChildren(successUI('Hai completato tutti i 7 round!'));
+                        done('simon');
+                    } else {
+                        showToast(`✅ Round ${level}/7 completato!`);
+                        setTimeout(()=>{startRound();},1000);
+                    }
+                }
+            }
+
+            btn.onclick=startRound;
         }
 
         function gamePairs(root, done){
@@ -514,6 +553,63 @@
             function hide(el){ el.textContent='?'; el.classList.remove('revealed'); }
             function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
         }
+
+        function gameLingo(root, done){
+            const words = {
+                5:["cielo","luce","sogno","muro","piano"],
+                6:["notare","stella","maree","soleil","mentre"],
+                7:["viaggio","cultura","pensare","amabile","animale"],
+                8:["splendida","fantasia","avventura","tramonto","fratello"]
+            };
+
+            let stage = 5; // parola da 5, poi 6,7,8
+            let currentWord = pickWord(stage);
+
+            const box = document.createElement('div');
+            const input = document.createElement('input');
+            input.maxLength=8; input.className='tile'; input.style.width='100%';
+            const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Invia';
+            const info=document.createElement('div'); info.className='footer';
+            box.append(input,btn,info);
+            root.appendChild(box);
+
+            function pickWord(len){
+                const arr=words[len]; return arr[Math.floor(Math.random()*arr.length)];
+            }
+            function resetGame(){
+                stage=5;
+                currentWord=pickWord(stage);
+                input.value='';
+                info.textContent=`Indovina la parola di ${stage} lettere.`;
+            }
+            function nextStage(){
+                if(stage===8){
+                    root.replaceChildren(successUI('Hai completato tutte le parole!'));
+                    done('lingo');
+                } else {
+                    stage++;
+                    currentWord=pickWord(stage);
+                    input.value='';
+                    info.textContent=`Bravo! Ora parola di ${stage} lettere.`;
+                }
+            }
+
+            btn.onclick=()=>{
+                const guess=input.value.toLowerCase().trim();
+                if(guess.length!==stage){ showToast(`Deve essere di ${stage} lettere`); return; }
+                if(guess===currentWord){
+                    diamondRain(80);
+                    nextStage();
+                } else {
+                    playErrorTone();
+                    showToast('❌ Sbagliato, ricominci da capo');
+                    resetGame();
+                }
+            };
+
+            resetGame();
+        }
+
 
         function successUI(text){ const box=document.createElement('div'); box.style.display='grid'; box.style.placeItems='center'; box.style.gap='10px'; box.style.height='200px'; const h=document.createElement('div'); h.style.fontSize='18px'; h.style.fontWeight='800'; h.textContent=text; const b=document.createElement('div'); b.className='footer'; b.textContent='Puoi tornare alla lista livelli.'; box.append('✅', h, b); return box; }
         
