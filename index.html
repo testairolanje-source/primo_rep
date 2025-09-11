@@ -125,10 +125,11 @@
         </main>
 
         <section class="card hidden" id="prizeSection" style="margin-top:16px">
-            <h2>🎉 Complimenti, sei stata bravissima!</h2>
+            <h2>🎉 Prova finale sbloccata!</h2>
             <div class="prize">
-                <p>Hai completato tutti i giochi. Ora puoi sbloccare il tuo premio finale!</p>
-                <button class="btn" id="claimPrizeBtn">Prosegui al tuo premio!</button>
+                <p>Congratulazioni, hai completato tutti i livelli!</p>
+                <button class="btn" id="goToQuizBtn">Passa alla prova finale</button>
+                <small class="footer">Preparati per l'ultima sfida!</small>
             </div>
         </section>
     </div>
@@ -145,6 +146,7 @@
             prizeCode: localStorage.getItem('prizeCode') || null,
         };
 
+        
         const LEVELS = [
             { id: 'snake', name: 'Livello 1 · Snake Diamanti', desc: 'Mangia i diamanti fino a lunghezza 30.', icon: '🐍', run: gameSnake },
             { id: 'simon', name: 'Livello 2 · Simon Marathon', desc: 'Supera 7 sequenze (da 4 a 10 passi).', icon: '🧠', run: gameSimon },
@@ -162,7 +164,7 @@
         }
         function updateProgressUI(){
             const bar = document.getElementById('progressBar');
-            const pct = Math.round((state.completed.length / (LEVELS.length - 1)) * 100);
+            const pct = Math.round((state.completed.length / LEVELS.length) * 100);
             bar.style.width = pct + '%';
         }
         function playClap(){
@@ -180,9 +182,9 @@
             const container = document.getElementById('levels');
             container.innerHTML = '';
             LEVELS.forEach((lvl, idx) => {
-                const isLingo = lvl.id === 'lingo';
+                const isQuiz = lvl.id === 'quiz';
                 const allPreviousCompleted = LEVELS.slice(0, LEVELS.length - 1).every(l => state.completed.includes(l.id));
-                const locked = !isLingo ? (idx > 0 && !state.completed.includes(LEVELS[idx-1].id)) : !allPreviousCompleted;
+                const locked = !isQuiz ? (idx > 0 && !state.completed.includes(LEVELS[idx-1].id)) : !allPreviousCompleted;
                 const done = state.completed.includes(lvl.id);
                 const row = document.createElement('div');
                 row.className = 'level';
@@ -204,7 +206,7 @@
         }
 
         function startLevel(lvl){
-            if(lvl.id === 'lingo') {
+            if(lvl.id === 'quiz') {
                 window.location.href = 'quiz.html';
                 return;
             }
@@ -222,19 +224,13 @@
                 playClap();
                 showToast('✅ Livello completato!');
             }
-            if(state.completed.length === LEVELS.length - 1){
-                unlockPrize();
-            }
+            if(state.completed.length === LEVELS.length - 1){ unlockPrize(); }
         }
 
         function unlockPrize(){
             const sec = document.getElementById('prizeSection');
             sec.classList.remove('hidden');
             diamondRain(220);
-            
-            document.getElementById('claimPrizeBtn').onclick = () => {
-                window.location.href = 'quiz.html';
-            };
         }
 
         function diamondRain(n=80){
@@ -248,14 +244,12 @@
                 path.setAttribute('fill','var(--accent)');
                 svg.appendChild(path);
                 s.appendChild(svg);
-                s.style.opacity = 0;
                 document.body.appendChild(s);
                 const duration = 900 + Math.random()*1200;
                 const translateX = (Math.random()*2-1)*120;
-                const initialOpacity = Math.random() * 0.5 + 0.5;
                 s.animate([
-                    { transform: `translate(0px,0px) rotate(${Math.random()*360}deg)`, opacity: initialOpacity },
-                    { transform: `translate(${translateX}px, 110vh) rotate(${360+Math.random()*360}deg)`, opacity: 0 }
+                    { transform: `translate(0px,0px) rotate(${Math.random()*360}deg)`, opacity:1 },
+                    { transform: `translate(${translateX}px, 110vh) rotate(${360+Math.random()*360}deg)`, opacity:0.9 }
                 ], { duration, easing:'cubic-bezier(.2,.8,.2,1)' }).addEventListener('finish', ()=> s.remove());
             }
         }
@@ -367,6 +361,7 @@
                 gameSnake(root, done);
             }
 
+            // Gestione input tastiera
             function handleKeyDown(e) {
                 switch (e.key) {
                     case 'ArrowUp':
@@ -385,6 +380,7 @@
             }
             document.addEventListener('keydown', handleKeyDown);
 
+            // Gestione input touch (pulsanti separati)
             function handleTouchTurn(turnDir) {
                 const { x, y } = direction;
                 if (turnDir === 'left') {
@@ -450,7 +446,7 @@
         }
 
         function gameSimon(root, done){
-            let level = 0;
+            let level = 0; // da 0 a 6 → lunghezze 4..10
             let seq = [];
             let input = [];
             let playing = false;
@@ -488,7 +484,7 @@
             }
 
             function startRound(){
-                const length = 4 + level;
+                const length = 4 + level; // sequenza da 4..10
                 seq = Array.from({length}, ()=> Math.floor(Math.random()*4));
                 input = [];
                 info.textContent=`Round ${level+1}/7: Osserva…`;
@@ -566,10 +562,10 @@
                 8: ["prezioso", "fantasia", "diamante", "tramonto", "fratello", "capanna"]
             };
 
-            let stage = 5;
+            let stage = 5; // Start with 5-letter words
             let currentWord = pickWord(stage);
             let attempts = 0;
-            const maxAttempts = 6;
+            const maxAttempts = 6; // Increased to 6 attempts
 
             const gameContainer = document.createElement('div');
             gameContainer.style.display = 'flex';
@@ -627,6 +623,7 @@
                     grid.appendChild(tile);
                 }
                 
+                // Show the first letter of the word
                 grid.children[0].textContent = currentWord[0].toUpperCase();
                 grid.children[0].style.background = '#065f46';
                 grid.children[0].style.border = '2px solid #065f46';
@@ -638,29 +635,32 @@
                 const guessLetters = guess.split('');
                 const checkedLetters = new Array(stage).fill(false);
                 
+                // The first letter is always correct and already shown
                 checkedLetters[0] = true;
                 correctLetters[0] = null;
                 
+                // First pass: mark correct position letters (green)
                 for (let i = 1; i < stage; i++) {
                     if (guessLetters[i] === correctLetters[i]) {
-                        tiles[attempts * stage + i].style.background = '#065f46';
+                        tiles[attempts * stage + i].style.background = '#065f46'; // Green
                         tiles[attempts * stage + i].style.border = '2px solid #065f46';
                         tiles[attempts * stage + i].textContent = guessLetters[i].toUpperCase();
                         checkedLetters[i] = true;
-                        correctLetters[i] = null;
+                        correctLetters[i] = null; // Mark as used
                     }
                 }
 
+                // Second pass: mark correct letters in wrong position (yellow)
                 for (let i = 0; i < stage; i++) {
                     if (!checkedLetters[i]) {
                         const correctIndex = correctLetters.findIndex(letter => letter === guessLetters[i]);
                         if (correctIndex !== -1) {
-                            tiles[attempts * stage + i].style.background = '#b45309';
+                            tiles[attempts * stage + i].style.background = '#b45309'; // Yellow
                             tiles[attempts * stage + i].style.border = '2px solid #b45309';
                             tiles[attempts * stage + i].textContent = guessLetters[i].toUpperCase();
-                            correctLetters[correctIndex] = null;
+                            correctLetters[correctIndex] = null; // Mark as used
                         } else {
-                            tiles[attempts * stage + i].style.background = '#333';
+                            tiles[attempts * stage + i].style.background = '#333'; // Grey
                             tiles[attempts * stage + i].style.border = '2px solid #333';
                             tiles[attempts * stage + i].textContent = guessLetters[i].toUpperCase();
                         }
@@ -701,6 +701,7 @@
                     return;
                 }
                 
+                // The first letter of the guess must match the word's first letter
                 if (guess[0] !== currentWord[0]) {
                     showToast(`La prima lettera deve essere "${currentWord[0].toUpperCase()}"`);
                     playErrorTone();
@@ -739,19 +740,19 @@
             resetGame();
         }
 
-        function successUI(msg) {
-            const div = document.createElement('div');
-            div.style.textAlign = 'center';
-            div.innerHTML = `
-                <h2 style="margin-top:0">${msg}</h2>
-                <div style="font-size:4em;margin-bottom:12px;">✅</div>
-                <button class="btn" onclick="window.location.reload()">Vai al prossimo</button>
-            `;
-            return div;
-        }
 
-        updateProgressUI();
-        renderLevels();
+        function successUI(text){ const box=document.createElement('div'); box.style.display='grid'; box.style.placeItems='center'; box.style.gap='10px'; box.style.height='200px'; const h=document.createElement('div'); h.style.fontSize='18px'; h.style.fontWeight='800'; h.textContent=text; const b=document.createElement('div'); b.className='footer'; b.textContent='Puoi tornare alla lista livelli.'; box.append('✅', h, b); return box; }
+        
+        document.getElementById('prizeSection').addEventListener('click', (event) => {
+            if (event.target && event.target.id === 'goToQuizBtn') {
+                window.location.href = 'quiz.html';
+            }
+        });
+
+
+        renderLevels(); updateProgressUI();
+        const allLevelsCompleted = LEVELS.slice(0, LEVELS.length - 1).every(l => state.completed.includes(l.id));
+        if(allLevelsCompleted) unlockPrize();
     </script>
 </body>
 </html>
