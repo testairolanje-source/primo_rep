@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Cruciverba Interattivo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+    }
+    h1 { margin: 20px; }
+    #crossword {
+      display: grid;
+      grid-template-columns: repeat(15, 30px);
+      grid-template-rows: repeat(15, 30px);
+      margin: 20px auto;
+      gap: 2px;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      background: black;
+    }
+    .input-cell {
+      background: white;
+      text-transform: uppercase;
+      text-align: center;
+      font-size: 18px;
+      border: 1px solid #ccc;
+    }
+    .wrong {
+      background: #ffb3b3 !important;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #next-btn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #options {
+      margin-top: 15px;
+      display: none;
+    }
+    button.option {
+      margin: 5px;
+      padding: 8px 15px;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .manual { background: #007bff; color: white; }
+    .highlight { background: #ffc107; color: black; }
+  </style>
+</head>
+<body>
+  <h1>Cruciverba</h1>
+  <div id="crossword"></div>
+  <div id="message"></div>
+  <div id="options">
+    <button class="option manual">Correggi da solo</button>
+    <button class="option highlight">Evidenzia errori</button>
+  </div>
+  <button id="next-btn">Prosegui</button>
+
+  <script>
+    // Schema cruciverba (B = blocco, lettere = soluzione)
+    const solution = [
+      "BIBLIOTECABBBBBB",
+      "B..............B",
+      "I..TEATRO......I",
+      "B..A...........B",
+      "L..MUSEO.......L",
+      "I..............I",
+      "O..PIAZZA......O",
+      "T..............T",
+      "E..SCUOLA......E",
+      "C..............C",
+      "A..CITTA.......A",
+      "B..............B",
+      "BBBBBBBBBBBBBBBB",
+      "BBBBBBBBBBBBBBBB",
+      "BBBBBBBBBBBBBBBB"
+    ];
+
+    const crossword = document.getElementById("crossword");
+    const size = solution.length;
+
+    // Crea griglia
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        const ch = solution[r][c];
+        if (ch === "B") {
+          const div = document.createElement("div");
+          div.className = "cell";
+          crossword.appendChild(div);
+        } else {
+          const input = document.createElement("input");
+          input.maxLength = 1;
+          input.className = "input-cell";
+          input.dataset.row = r;
+          input.dataset.col = c;
+          crossword.appendChild(input);
+        }
+      }
+    }
+
+    function checkCrossword(highlight=false) {
+      let correct = true;
+      document.querySelectorAll(".input-cell").forEach(input => {
+        const r = input.dataset.row;
+        const c = input.dataset.col;
+        const expected = solution[r][c];
+        const val = input.value.toUpperCase();
+        if (val !== expected) {
+          correct = false;
+          if (highlight) input.classList.add("wrong");
+          else input.classList.remove("wrong");
+        } else {
+          input.classList.remove("wrong");
+        }
+      });
+      if (correct) {
+        document.getElementById("message").textContent = "🎉 Complimenti! Cruciverba completato!";
+        document.getElementById("options").style.display = "none";
+        document.getElementById("next-btn").style.display = "inline-block";
+      } else {
+        document.getElementById("message").textContent = "❌ Ci sono errori!";
+        document.getElementById("options").style.display = "block";
+        document.getElementById("next-btn").style.display = "none";
+      }
+    }
+
+    // Controllo quando tutti i campi sono riempiti
+    document.querySelectorAll(".input-cell").forEach(input => {
+      input.addEventListener("input", () => {
+        const allFilled = [...document.querySelectorAll(".input-cell")]
+          .every(cell => cell

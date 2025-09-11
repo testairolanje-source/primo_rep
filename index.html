@@ -565,7 +565,7 @@
             let stage = 5; // Start with 5-letter words
             let currentWord = pickWord(stage);
             let attempts = 0;
-            const maxAttempts = 5;
+            const maxAttempts = 6; // Increased to 6 attempts
 
             const gameContainer = document.createElement('div');
             gameContainer.style.display = 'flex';
@@ -622,6 +622,11 @@
                     tile.style.borderRadius = '8px';
                     grid.appendChild(tile);
                 }
+                
+                // Show the first letter of the word
+                grid.children[0].textContent = currentWord[0].toUpperCase();
+                grid.children[0].style.background = '#065f46';
+                grid.children[0].style.border = '2px solid #065f46';
             }
 
             function updateGrid(guess) {
@@ -630,8 +635,12 @@
                 const guessLetters = guess.split('');
                 const checkedLetters = new Array(stage).fill(false);
                 
+                // The first letter is always correct and already shown
+                checkedLetters[0] = true;
+                correctLetters[0] = null;
+                
                 // First pass: mark correct position letters (green)
-                for (let i = 0; i < stage; i++) {
+                for (let i = 1; i < stage; i++) {
                     if (guessLetters[i] === correctLetters[i]) {
                         tiles[attempts * stage + i].style.background = '#065f46'; // Green
                         tiles[attempts * stage + i].style.border = '2px solid #065f46';
@@ -666,7 +675,7 @@
                 input.maxLength = stage;
                 input.value = '';
                 createGrid();
-                info.textContent = `Indovina la parola di ${stage} lettere.`;
+                info.textContent = `Indovina la parola di ${stage} lettere. Hai ${maxAttempts} tentativi.`;
             }
 
             function nextStage() {
@@ -680,7 +689,7 @@
                     input.maxLength = stage;
                     input.value = '';
                     createGrid();
-                    info.textContent = `Hai indovinato! Ora una parola di ${stage} lettere.`;
+                    info.textContent = `Bravo! Ora una parola di ${stage} lettere. Hai ${maxAttempts} tentativi.`;
                     diamondRain(80);
                 }
             }
@@ -689,6 +698,13 @@
                 const guess = input.value.toLowerCase().trim();
                 if (guess.length !== stage) {
                     showToast(`La parola deve essere di ${stage} lettere.`);
+                    return;
+                }
+                
+                // The first letter of the guess must match the word's first letter
+                if (guess[0] !== currentWord[0]) {
+                    showToast(`La prima lettera deve essere "${currentWord[0].toUpperCase()}"`);
+                    playErrorTone();
                     return;
                 }
 
