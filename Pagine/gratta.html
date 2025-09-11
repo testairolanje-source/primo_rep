@@ -5,47 +5,48 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Gratta & Vinci - Sorpresa</title>
 <style>
-  :root{--accent:#ff6b6b;--muted:#9aa4b2}
-  body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#071426,#0f1724);color:#e6eef6}
-  .wrap{max-width:1000px;margin:20px auto;padding:16px;text-align:center}
-  .legend{background:rgba(255,255,255,.04);padding:10px;border-radius:10px;margin:12px 0}
-  .legend ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0;justify-content:center}
-  .tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-  .ticket{background:rgba(255,255,255,.03);padding:10px;border-radius:12px;position:relative}
-  .ticket.locked{opacity:.6}
-  .cells{display:flex;gap:6px}
-  .cell{flex:1;position:relative;background:#fff;border-radius:8px;min-height:70px;display:flex;align-items:center;justify-content:center;font-size:28px}
-  .symbol{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-  canvas.scratch{position:absolute;inset:0;width:100%;height:100%}
-  .result{margin-top:6px;font-weight:600;min-height:20px}
-  .next{margin-top:6px;padding:6px 10px;border-radius:8px;border:0;background:var(--accent);color:#fff}
-  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:50;opacity:0;pointer-events:none;transition:.2s}
-  .modal.show{opacity:1;pointer-events:auto}
-  .card{background:#071428;padding:16px;border-radius:12px}
-  .diamond{position:fixed;top:-40px;font-size:22px;animation:fall 3s linear infinite;z-index:60}
-  @keyframes fall{to{transform:translateY(120vh) rotate(360deg);opacity:0}}
-  .flash{animation:flash .6s infinite}
-  @keyframes flash{50%{filter:brightness(1.8)}}
-  @media(max-width:520px){.cells{flex-direction:column}.cell{min-height:60px}}
+  :root{--accent:#ff6b6b;--muted:#9aa4b2}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#071426,#0f1724);color:#e6eef6}
+  .wrap{max-width:1000px;margin:20px auto;padding:16px;text-align:center}
+  .legend{background:rgba(255,255,255,.04);padding:10px;border-radius:10px;margin:12px 0}
+  .legend ul{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0;justify-content:center}
+  .tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .ticket{background:rgba(255,255,255,.03);padding:10px;border-radius:12px;position:relative}
+  .ticket.locked{opacity:.6}
+  .cells{display:flex;gap:6px}
+  .cell{flex:1;position:relative;background:#fff;border-radius:8px;min-height:70px;display:flex;align-items:center;justify-content:center;font-size:28px}
+  .symbol{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  canvas.scratch{position:absolute;inset:0;width:100%;height:100%}
+  .result{margin-top:6px;font-weight:600;min-height:20px}
+  .next{margin-top:6px;padding:6px 10px;border-radius:8px;border:0;background:var(--accent);color:#fff}
+  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:50;opacity:0;pointer-events:none;transition:.2s}
+  .modal.show{opacity:1;pointer-events:auto}
+  .card{background:#071428;padding:16px;border-radius:12px}
+  .diamond{position:fixed;top:-40px;font-size:22px;animation:fall 3s linear infinite;z-index:60}
+  @keyframes fall{to{transform:translateY(120vh) rotate(360deg);opacity:0}}
+  .flash{animation:flash .6s infinite}
+  @keyframes flash{50%{filter:brightness(1.8)}}
+  @media(max-width:520px){.cells{flex-direction:column}.cell{min-height:60px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Buon Compleanno — Gratta & Vinci 🎉</h1>
-  <p class="lead">Gratta i biglietti in ordine e scopri le sorprese!</p>
-  <div class="legend"><ul>
-    <li>🍒🍒🍒 = 1€</li><li>🍓🍓🍓 = 2€</li><li>🍌🍌🍌 = 5€</li>
-    <li>🍍🍍🍍 = 20€</li><li>💶💶💶 = 100€</li><li>👑👑👑 = 500€</li><li>💎💎💎 = SuperPremio</li>
-  </ul></div>
-  <div class="tickets" id="tickets"></div>
+    <p style="font-size: 1.1em; max-width: 600px; margin: 20px auto; text-align: center;">A tutti piacciono i giochi, ma certamente quelli che piacciono di più a te sono quelli d'azzardo, perciò eccoti il tuo regalo, ben 8 gratta e vinci, chissà che non vinci qualcosa.."</p>
+  <h1>Buon Compleanno — Gratta & Vinci 🎉</h1>
+  <p class="lead">Gratta i biglietti in ordine e scopri le sorprese!</p>
+  <div class="legend"><ul>
+    <li>🍒🍒🍒 = 1€</li><li>🍓🍓🍓 = 2€</li><li>🍌🍌🍌 = 5€</li>
+    <li>🍍🍍🍍 = 20€</li><li>💶💶💶 = 100€</li><li>👑👑👑 = 500€</li><li>💎💎💎 = SuperPremio</li>
+  </ul></div>
+  <div class="tickets" id="tickets"></div>
 </div>
 <div class="modal" id="modal"><div class="card">
-  <h3>Hai vinto il superpremio!</h3>
-  <p>Preferisci aprirlo o prendere la busta da 500€?</p>
-  <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
-    <button id="btn500">Busta 500€</button>
-    <button id="btnMyst">Superpremio</button>
-  </div>
+  <h3>Hai vinto il superpremio!</h3>
+  <p>Preferisci aprirlo o prendere la busta da 500€?</p>
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+    <button id="btn500">Busta 500€</button>
+    <button id="btnMyst">Superpremio</button>
+  </div>
 </div></div>
 <script>
 // short and robust implementation
@@ -60,54 +61,54 @@ const loseS=()=>[320,260].forEach((f,i)=>setTimeout(()=>play(f,.12,'sawtooth',.0
 let superInt;const startSuper=()=>{const m=[440,660,880,660,440,330];let i=0;superInt=setInterval(()=>play(m[i++%m.length],.3,'sine',.06),300)};const stopSuper=()=>clearInterval(superInt);
 
 function make(i){
-  const t=document.createElement('div'); t.className='ticket'; if(i>0) t.classList.add('locked');
-  t.innerHTML=`<h4>Biglietto ${i+1}</h4><div class="cells">${OUT[i].map(s=>`<div class="cell"><div class="symbol">${s}</div><canvas class="scratch"></canvas></div>`).join('')}</div><div class="result"></div><button class="next" disabled>Prossimo</button>`;
-  ticketsEl.appendChild(t);
-  const canvases = t.querySelectorAll('canvas');
-  canvases.forEach((cv,ci)=>initCanvas(cv,i,ci,t));
-  const res = t.querySelector('.result');
-  const btn = t.querySelector('.next');
-  btn.addEventListener('click',()=>{states[i].done=true; t.classList.add('completed','locked'); btn.disabled=true; const n=t.nextElementSibling; if(n) n.classList.remove('locked'); if(n) setTimeout(()=>n.scrollIntoView({behavior:'smooth',block:'center'}),120)});
-  t.check = ()=>{
-    if(states[i].done) return;
-    if(states[i].cells.every(v=>v)){
-      const win = OUT[i][0]===OUT[i][1] && OUT[i][1]===OUT[i][2];
-      res.textContent = win? `Hai vinto ${PR[OUT[i][0]]}` : 'Hai Perso';
-      states[i].done = true; states[i].text = res.textContent; btn.disabled=false; win?winS():loseS();
-      if(i===OUT.length-1 && win && OUT[i][0]==='💎') celebrate();
-    }
-  };
-  // if already completed (reload), show text
-  if(states[i].done) res.textContent = states[i].text;
+  const t=document.createElement('div'); t.className='ticket'; if(i>0) t.classList.add('locked');
+  t.innerHTML=`<h4>Biglietto ${i+1}</h4><div class="cells">${OUT[i].map(s=>`<div class="cell"><div class="symbol">${s}</div><canvas class="scratch"></canvas></div>`).join('')}</div><div class="result"></div><button class="next" disabled>Prossimo</button>`;
+  ticketsEl.appendChild(t);
+  const canvases = t.querySelectorAll('canvas');
+  canvases.forEach((cv,ci)=>initCanvas(cv,i,ci,t));
+  const res = t.querySelector('.result');
+  const btn = t.querySelector('.next');
+  btn.addEventListener('click',()=>{states[i].done=true; t.classList.add('completed','locked'); btn.disabled=true; const n=t.nextElementSibling; if(n) n.classList.remove('locked'); if(n) setTimeout(()=>n.scrollIntoView({behavior:'smooth',block:'center'}),120)});
+  t.check = ()=>{
+    if(states[i].done) return;
+    if(states[i].cells.every(v=>v)){
+      const win = OUT[i][0]===OUT[i][1] && OUT[i][1]===OUT[i][2];
+      res.textContent = win? `Hai vinto ${PR[OUT[i][0]]}` : 'Hai Perso';
+      states[i].done = true; states[i].text = res.textContent; btn.disabled=false; win?winS():loseS();
+      if(i===OUT.length-1 && win && OUT[i][0]==='💎') celebrate();
+    }
+  };
+  // if already completed (reload), show text
+  if(states[i].done) res.textContent = states[i].text;
 }
 
 function initCanvas(cv,i,ci,ticket){
-  const parentCell = cv.parentElement;
-  const ctxCanvas = ()=>cv.getContext('2d');
-  function setup(){
-    const r = parentCell.getBoundingClientRect();
-    cv.width = Math.max(1, Math.floor(r.width * devicePixelRatio));
-    cv.height = Math.max(1, Math.floor(r.height * devicePixelRatio));
-    cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
-    const c = ctxCanvas(); c.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-    c.fillStyle = '#bdbdbd'; c.fillRect(0,0,r.width,r.height); c.globalCompositeOperation='destination-out';
-    cv.style.background = 'none';
-    if(states[i].cells[ci]){ c.clearRect(0,0,r.width,r.height); cv.style.pointerEvents='none'; }
-  }
-  setup();
-  let drawing=false;
-  function getRect(){ return parentCell.getBoundingClientRect(); }
-  function pointerDown(e){ if(ticket.classList.contains('locked')||states[i].done) return; if(e.cancelable) e.preventDefault(); audioCtx?.resume?.(); drawing=true; draw(e); }
-  function pointerUp(e){ if(e && e.cancelable) e.preventDefault(); drawing=false; check(); }
-  function draw(e){ if(!drawing) return; const r=getRect(); const c = ctxCanvas(); const clientX = e.touches?e.touches[0].clientX:e.clientX; const clientY = e.touches?e.touches[0].clientY:e.clientY; const x = clientX - r.left; const y = clientY - r.top; const radius = Math.max(12, Math.min(26, r.width*0.06)); c.beginPath(); c.arc(x,y,radius,0,Math.PI*2); c.fill(); play(600,0.03,'square',0.02); if(e.cancelable) e.preventDefault(); }
-  function check(){ const r = parentCell.getBoundingClientRect(); const tw=8, th=8; const tmp = document.createElement('canvas'); tmp.width=tw; tmp.height=th; const tctx = tmp.getContext('2d'); tctx.drawImage(cv,0,0,tw,th); const data = tctx.getImageData(0,0,tw,th).data; let cleared=0; for(let p=3;p<data.length;p+=4) if(data[p]===0) cleared++; if(cleared/(tw*th) > 0.8){ const c = ctxCanvas(); c.clearRect(0,0,r.width,r.height); cv.style.pointerEvents='none'; states[i].cells[ci]=true; ticket.check(); } }
-  cv.addEventListener('pointerdown', pointerDown, {passive:false});
-  window.addEventListener('pointerup', pointerUp);
-  cv.addEventListener('pointermove', draw);
-  cv.addEventListener('touchstart', pointerDown, {passive:false});
-  cv.addEventListener('touchmove', draw, {passive:false});
-  // reposition/resize handlers
-  let deb; window.addEventListener('resize', ()=>{ clearTimeout(deb); deb=setTimeout(setup,80); }, {passive:true}); window.addEventListener('scroll', ()=>{ clearTimeout(deb); deb=setTimeout(setup,80); }, {passive:true});
+  const parentCell = cv.parentElement;
+  const ctxCanvas = ()=>cv.getContext('2d');
+  function setup(){
+    const r = parentCell.getBoundingClientRect();
+    cv.width = Math.max(1, Math.floor(r.width * devicePixelRatio));
+    cv.height = Math.max(1, Math.floor(r.height * devicePixelRatio));
+    cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
+    const c = ctxCanvas(); c.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    c.fillStyle = '#bdbdbd'; c.fillRect(0,0,r.width,r.height); c.globalCompositeOperation='destination-out';
+    cv.style.background = 'none';
+    if(states[i].cells[ci]){ c.clearRect(0,0,r.width,r.height); cv.style.pointerEvents='none'; }
+  }
+  setup();
+  let drawing=false;
+  function getRect(){ return parentCell.getBoundingClientRect(); }
+  function pointerDown(e){ if(ticket.classList.contains('locked')||states[i].done) return; if(e.cancelable) e.preventDefault(); audioCtx?.resume?.(); drawing=true; draw(e); }
+  function pointerUp(e){ if(e && e.cancelable) e.preventDefault(); drawing=false; check(); }
+  function draw(e){ if(!drawing) return; const r=getRect(); const c = ctxCanvas(); const clientX = e.touches?e.touches[0].clientX:e.clientX; const clientY = e.touches?e.touches[0].clientY:e.clientY; const x = clientX - r.left; const y = clientY - r.top; const radius = Math.max(12, Math.min(26, r.width*0.06)); c.beginPath(); c.arc(x,y,radius,0,Math.PI*2); c.fill(); play(600,0.03,'square',0.02); if(e.cancelable) e.preventDefault(); }
+  function check(){ const r = parentCell.getBoundingClientRect(); const tw=8, th=8; const tmp = document.createElement('canvas'); tmp.width=tw; tmp.height=th; const tctx = tmp.getContext('2d'); tctx.drawImage(cv,0,0,tw,th); const data = tctx.getImageData(0,0,tw,th).data; let cleared=0; for(let p=3;p<data.length;p+=4) if(data[p]===0) cleared++; if(cleared/(tw*th) > 0.8){ const c = ctxCanvas(); c.clearRect(0,0,r.width,r.height); cv.style.pointerEvents='none'; states[i].cells[ci]=true; ticket.check(); } }
+  cv.addEventListener('pointerdown', pointerDown, {passive:false});
+  window.addEventListener('pointerup', pointerUp);
+  cv.addEventListener('pointermove', draw);
+  cv.addEventListener('touchstart', pointerDown, {passive:false});
+  cv.addEventListener('touchmove', draw, {passive:false});
+  // reposition/resize handlers
+  let deb; window.addEventListener('resize', ()=>{ clearTimeout(deb); deb=setTimeout(setup,80); }, {passive:true}); window.addEventListener('scroll', ()=>{ clearTimeout(deb); deb=setTimeout(setup,80); }, {passive:true});
 }
 
 function celebrate(){ document.body.classList.add('flash'); startSuper(); for(let i=0;i<25;i++){ const d=document.createElement('div'); d.className='diamond'; d.textContent='💎'; d.style.left=(5+Math.random()*90)+'%'; d.style.fontSize=(16+Math.random()*24)+'px'; d.style.animationDuration=(2+Math.random()*2)+'s'; document.body.appendChild(d); setTimeout(()=>d.remove(),5500); } setTimeout(()=>document.getElementById('modal').classList.add('show'),800); }

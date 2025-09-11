@@ -128,9 +128,7 @@
             <h2>🎉 Prova finale sbloccata!</h2>
             <div class="prize">
                 <p>Congratulazioni, hai completato tutti i livelli!</p>
-                <a href="https://testairolanje-source.github.io/primo_rep/Pagine/gratta" target="_blank">
-                    <button class="btn" id="goToQuizBtn">Vai a Google</button>
-                </a>
+                <button class="btn" id="goToQuizBtn">Passa alla prova finale</button>
                 <small class="footer">Preparati per l'ultima sfida!</small>
             </div>
         </section>
@@ -209,7 +207,7 @@
 
         function startLevel(lvl){
             if(lvl.id === 'quiz') {
-                window.location.href = 'quiz.html';
+                window.location.href = 'gratta.html';
                 return;
             }
             state.current = lvl.id;
