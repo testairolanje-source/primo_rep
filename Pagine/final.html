@@ -1,202 +1,177 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scegli il destino</title>
-  <style>
-    body {
-      background: white;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    h1 {
-      margin: 20px auto;
-      max-width: 500px;
-      text-align: center;
-      position: relative; /* Per essere sopra l'overlay quando visibile */
-      z-index: 1; /* Per essere sopra l'overlay quando visibile */
-    }
-    .corner {
-      position: absolute;
-      width: auto;
-      height: 45%;
-      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
-      transition: transform 0.8s ease-out, top 0.8s ease-out, left 0.8s ease-out, right 0.8s ease-out, bottom 0.8s ease-out, z-index 0s; /* Aggiungi transition per smooth move */
-      z-index: 1; /* Per essere sopra l'overlay di default */
-    }
-    #top-left { top: 20px; left: 80px; }
-    #top-right { top: 20px; right: 80px; }
-    #bottom-left { bottom: 20px; left: 80px; }
-    #bottom-right { bottom: 20px; right: 80px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scegli il destino</title>
+    <style>
+        body {
+            background: white;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px auto;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .corner {
+            position: absolute;
+            width: 40vmin;
+            height: 40vmin;
+            max-width: 250px;
+            max-height: 250px;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
+            transition: transform 0.8s ease-out, top 0.8s ease-out, left 0.8s ease-out, right 0.8s ease-out, bottom 0.8s ease-out, z-index 0s;
+            z-index: 1;
+        }
+        #top-left { top: 3%; left: 3%; }
+        #top-right { top: 3%; right: 3%; }
+        #bottom-left { bottom: 3%; left: 3%; }
+        #bottom-right { bottom: 3%; right: 3%; }
+        
+        #spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 150px;
+            background: red;
+            transform-origin: bottom center;
+            transform: translate(-50%, -50%) rotate(0deg);
+            clip-path: polygon(50% 0%, 60% 100%, 40% 100%);
+            border-radius: 5px;
+            z-index: 2;
+        }
+        #chooseBtn {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            background: gold;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+        .diamond {
+            position: fixed;
+            top: -50px;
+            font-size: 24px;
+            color: deepskyblue;
+            animation: fall 3s linear forwards;
+            z-index: 3;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh); }
+        }
 
-    #spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 50px;
-      height: 150px;
-      background: red;
-      transform-origin: bottom center;
-      transform: translate(-50%, -50%) rotate(0deg);
-      clip-path: polygon(50% 0%, 60% 100%, 40% 100%);
-      border-radius: 5px;
-      z-index: 2; /* Sopra le immagini e l'overlay */
-    }
-    #chooseBtn {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      font-size: 18px;
-      cursor: pointer;
-      background: gold;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      z-index: 2; /* Sopra le immagini e l'overlay */
-    }
-    .diamond {
-      position: fixed;
-      top: -50px;
-      font-size: 24px;
-      color: deepskyblue;
-      animation: fall 3s linear forwards;
-      z-index: 3; /* Sopra tutto per essere visibile */
-    }
-    @keyframes fall {
-      to { transform: translateY(110vh); }
-    }
-
-    /* Stili per l'overlay e l'immagine vincente */
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0); /* Inizia trasparente */
-      pointer-events: none; /* Non blocca gli eventi del mouse di default */
-      transition: background 0.8s ease-out; /* Animazione per l'ombra */
-      z-index: 0; /* Sotto le immagini e la trottola */
-    }
-    #overlay.active {
-      background: rgba(0, 0, 0, 0.7); /* Ombra scura */
-      pointer-events: auto; /* Blocca gli eventi del mouse quando attivo */
-      z-index: 2; /* Sopra le immagini normali */
-    }
-    .corner.winner {
-      transform: translate(-50%, -50%) scale(1.5); /* Ingrandisce di 1.5x (regolabile) */
-      top: 50% !important; /* Porta al centro verticalmente */
-      left: 50% !important; /* Porta al centro orizzontalmente */
-      right: auto !important;
-      bottom: auto !important;
-      z-index: 3; /* Porta sopra l'overlay */
-    }
-    /* Rimuovi la box-shadow per gli elementi non vincenti quando l'overlay è attivo */
-    #overlay.active + #top-left:not(.winner),
-    #overlay.active + #top-right:not(.winner),
-    #overlay.active + #bottom-left:not(.winner),
-    #overlay.active + #bottom-right:not(.winner) {
-      box-shadow: none;
-    }
-  </style>
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            pointer-events: none;
+            transition: background 0.8s ease-out;
+            z-index: 0;
+        }
+        #overlay.active {
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: auto;
+            z-index: 2;
+        }
+        .corner.winner {
+            transform: translate(-50%, -50%) scale(1.5);
+            top: 50% !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            z-index: 3;
+        }
+        #overlay.active + #top-left,
+        #overlay.active + #top-right,
+        #overlay.active + #bottom-left,
+        #overlay.active + #bottom-right {
+            box-shadow: none;
+        }
+        #overlay.active + .corner:not(.winner) {
+            opacity: 0;
+        }
+    </style>
 </head>
 <body>
-  <h1>Ero indeciso tra questi 4 quindi sarà il fato a scegliere per noi</h1>
-
-  <div id="overlay"></div>
-
-  <img id="top-left" class="corner" src="Assets/cuoremix.png">
-  <img id="top-right" class="corner" src="Assets/flomix.png">
-  <img id="bottom-left" class="corner" src="Assets/trilomix.png">
-  <img id="bottom-right" class="corner" src="Assets/delimix.png">
-
-  <div id="spinner"></div>
-  <button id="chooseBtn">Scegli per me</button>
-
-  <audio id="victorySound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
-
-  <script>
-    const spinner = document.getElementById("spinner");
-    const btn = document.getElementById("chooseBtn");
-    const sound = document.getElementById("victorySound");
-    const overlay = document.getElementById("overlay");
-    const corners = {
-      0: document.getElementById("top-right"),    // 0-89 deg (idealmente 45)
-      1: document.getElementById("bottom-right"),   // 90-179 deg (idealmente 135)
-      2: document.getElementById("bottom-left"),// 180-269 deg (idealmente 225)
-      3: document.getElementById("top-left")  // 270-359 deg (idealmente 315)
-    };
-
-    btn.addEventListener("click", () => {
-      // Disabilita il pulsante per evitare click multipli
-      btn.disabled = true;
-
-      // Reset visivo
-      Object.values(corners).forEach(img => {
-        img.classList.remove('winner');
-      });
-      overlay.classList.remove('active');
-      spinner.style.transition = "none";
-      spinner.style.transform = `translate(-50%, -50%) rotate(0deg)`; // Reset spinner position
-
-      // Ritardo per il reset visivo prima di iniziare la nuova animazione
-      setTimeout(() => {
-        const initialRotation = Math.floor(Math.random() * 4) * 90; // Starting random quadrant
-        spinner.style.transform = `translate(-50%, -50%) rotate(${initialRotation}deg)`; // Set initial random rotation without transition
-
-        setTimeout(() => { // Give a small delay to apply initial rotation before starting full spin
-          const spins = Math.floor(Math.random() * 4); // 0-3 giri aggiuntivi per la trottola
-          const targetQuadrantIndex = initialRotation/90; // 0-3, l'indice dell'angolo vincente
-          const rotationOffset = 45; // Angolo per puntare al centro del quadrante (90/2)
-
-          // Calcola l'angolo finale:
-          // 360 * numero_giri_completi (es. 5)
-          // + rotazione_iniziale (per partire da un punto casuale)
-          // + targetQuadrantIndex * 90 (per arrivare al centro del quadrante vincente)
-          // + rotationOffset (per puntare al centro dell'immagine nel quadrante)
-          // + un piccolo offset casuale per rendere meno "preciso" (es. +/- 10 gradi)
-          const finalDeg = 360 * 5 + initialRotation + (targetQuadrantIndex * 90) + rotationOffset + (Math.random() * 20 - 10);
-          
-          spinner.style.transition = "transform 4s ease-out";
-          spinner.style.transform = `translate(-50%, -50%) rotate(${finalDeg}deg)`;
-
-          setTimeout(() => {
-            // Abilita il pulsante dopo l'animazione completa
-            btn.disabled = false;
-
-            // Attiva l'overlay
-            overlay.classList.add('active');
-
-            // Trova l'immagine vincente e applica la classe 'winner'
-            const winningImage = corners[targetQuadrantIndex];
-            if (winningImage) {
-              winningImage.classList.add('winner');
-              winningImage.style.zIndex = '3'; // Assicurati che l'immagine vincente sia sopra l'overlay
+    <h1>Ero indeciso tra questi 4 quindi sarà il fato a scegliere per noi</h1>
+    <div id="overlay"></div>
+    <img id="top-left" class="corner" src="Assets/cuoremix.png">
+    <img id="top-right" class="corner" src="Assets/flomix.png">
+    <img id="bottom-left" class="corner" src="Assets/trilomix.png">
+    <img id="bottom-right" class="corner" src="Assets/delimix.png">
+    <div id="spinner"></div>
+    <button id="chooseBtn">Scegli per me</button>
+    <audio id="victorySound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
+    <script>
+        const spinner = document.getElementById("spinner");
+        const btn = document.getElementById("chooseBtn");
+        const sound = document.getElementById("victorySound");
+        const overlay = document.getElementById("overlay");
+        const corners = {
+            0: document.getElementById("top-right"),
+            1: document.getElementById("bottom-right"),
+            2: document.getElementById("bottom-left"),
+            3: document.getElementById("top-left")
+        };
+        btn.addEventListener("click", () => {
+            btn.disabled = true;
+            Object.values(corners).forEach(img => {
+                img.classList.remove('winner');
+            });
+            overlay.classList.remove('active');
+            spinner.style.transition = "none";
+            spinner.style.transform = `translate(-50%, -50%) rotate(0deg)`;
+            setTimeout(() => {
+                const initialRotation = Math.floor(Math.random() * 4) * 90;
+                spinner.style.transform = `translate(-50%, -50%) rotate(${initialRotation}deg)`;
+                setTimeout(() => {
+                    const spins = Math.floor(Math.random() * 4);
+                    const targetQuadrantIndex = initialRotation/90;
+                    const rotationOffset = 45;
+                    const finalDeg = 360 * 5 + initialRotation + (targetQuadrantIndex * 90) + rotationOffset + (Math.random() * 20 - 10);
+                    spinner.style.transition = "transform 4s ease-out";
+                    spinner.style.transform = `translate(-50%, -50%) rotate(${finalDeg}deg)`;
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        overlay.classList.add('active');
+                        const winningImage = corners[targetQuadrantIndex];
+                        if (winningImage) {
+                            winningImage.classList.add('winner');
+                            winningImage.style.zIndex = '3';
+                        }
+                        makeDiamonds();
+                        sound.play();
+                    }, 4200);
+                }, 50);
+            }, 100);
+        });
+        function makeDiamonds() {
+            for (let i = 0; i < 30; i++) {
+                const d = document.createElement("div");
+                d.className = "diamond";
+                d.style.left = Math.random() * 100 + "vw";
+                d.innerHTML = "💎";
+                document.body.appendChild(d);
+                setTimeout(() => d.remove(), 3000);
             }
-            
-            makeDiamonds();
-            sound.play();
-          }, 4200); // Ritardo per l'animazione della trottola
-        }, 50); // Small delay to ensure initial rotation is applied before transition starts
-      }, 100); // Small delay for visual reset
-    });
-
-    function makeDiamonds() {
-      for (let i = 0; i < 30; i++) {
-        const d = document.createElement("div");
-        d.className = "diamond";
-        d.style.left = Math.random() * 100 + "vw";
-        d.innerHTML = "💎";
-        document.body.appendChild(d);
-        setTimeout(() => d.remove(), 3000);
-      }
-    }
-  </script>
+        }
+    </script>
 </body>
 </html>
