@@ -1,431 +1,543 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gioco a Livelli – Vinci il Premio!</title>
-  <style>
-    :root{
-      --bg: #0f172a;
-      --text: #e5e7eb;
-      --soft: #9ca3af;
-      --primary: #22c55e;
-      --accent: #60a5fa;
-      --danger: #ef4444;
-      --radius: 18px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; background: radial-gradient(1200px 800px at 80% -10%, #1e293b 0, transparent 60%), radial-gradient(1000px 600px at -10% 110%, #111827 0, transparent 60%), var(--bg); color:var(--text);}
-    .wrap{max-width:1100px; margin:0 auto; padding:24px}
-    header{display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap}
-    .brand{display:flex; align-items:center; gap:12px}
-    .logo{width:42px; height:42px; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--primary)); display:grid; place-items:center; color:#0b1020; font-weight:800; box-shadow:var(--shadow)}
-    h1{font-size: clamp(22px, 3vw, 32px); margin:0}
-    .progress{flex:1; min-width:240px; max-width:480px; height:12px; background: #0b1220; border-radius:999px; overflow:hidden; box-shadow:inset 0 0 0 1px #1b2640}
-    .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--primary)); transition:width .4s ease}
-    .card{background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); padding:20px; display:flex; flex-direction:column; gap:16px}
-    .grid{display:grid; gap:16px}
-    @media(min-width:900px){ .grid{grid-template-columns: 1fr 1fr} }
-    .levels{display:grid; gap:12px}
-    .level{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; border-radius:14px; background: #0b1220; border:1px solid rgba(255,255,255,.06)}
-    .pill{padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.1)}
-    .pill.lock{background:#1a243d}
-    .pill.done{background:rgba(34,197,94,.2); color:#a7f3d0; border-color:rgba(34,197,94,.35)}
-    .btn{appearance:none; border:none; background:linear-gradient(135deg, var(--accent), var(--primary)); color:#06111e; font-weight:700; padding:12px 16px; border-radius:12px; cursor:pointer; transition: transform .08s ease, filter .2s ease; box-shadow: var(--shadow)}
-    .btn:active{transform:translateY(1px)}
-    .btn[disabled]{opacity:.5; filter:grayscale(1); cursor:not-allowed}
-    .game{margin-top:0}
-    .hidden{display:none !important}
-    .snake-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; max-width: 200px; margin: 16px auto 0; }
-    .snake-controls button { grid-column: 2; }
-    .snake-controls button:nth-child(2) { grid-column: 1; }
-    .snake-controls button:nth-child(3) { grid-column: 3; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gioco a Livelli – Vinci il Premio!</title>
+    <style>
+        :root{
+            --bg: #0f172a;
+            --text: #e5e7eb;
+            --soft: #9ca3af;
+            --primary: #22c55e;
+            --accent: #60a5fa;
+            --danger: #ef4444;
+            --radius: 18px;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; background: radial-gradient(1200px 800px at 80% -10%, #1e293b 0, transparent 60%), radial-gradient(1000px 600px at -10% 110%, #111827 0, transparent 60%), var(--bg); color:var(--text);}
+        .wrap{max-width:1100px; margin:0 auto; padding:24px}
+        header{display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap}
+        .brand{display:flex; align-items:center; gap:12px}
+        .logo{width:42px; height:42px; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--primary)); display:grid; place-items:center; color:#0b1020; font-weight:800; box-shadow:var(--shadow)}
+        h1{font-size: clamp(22px, 3vw, 32px); margin:0}
+        .progress{flex:1; min-width:240px; max-width:480px; height:12px; background: #0b1220; border-radius:999px; overflow:hidden; box-shadow:inset 0 0 0 1px #1b2640}
+        .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--primary)); transition:width .4s ease}
+        .card{background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); padding:20px}
+        .grid{display:grid; gap:16px}
+        @media(min-width:900px){ .grid{grid-template-columns: 1fr 1fr} }
+        .levels{display:grid; gap:12px}
+        .level{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; border-radius:14px; background: #0b1220; border:1px solid rgba(255,255,255,.06)}
+        .pill{padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.1)}
+        .pill.lock{background:#1a243d}
+        .pill.done{background:rgba(34,197,94,.2); color:#a7f3d0; border-color:rgba(34,197,94,.35)}
+        .btn{appearance:none; border:none; background:linear-gradient(135deg, var(--accent), var(--primary)); color:#06111e; font-weight:700; padding:12px 16px; border-radius:12px; cursor:pointer; transition: transform .08s ease, filter .2s ease; box-shadow: var(--shadow)}
+        .btn:active{transform:translateY(1px)}
+        .btn[disabled]{opacity:.5; filter:grayscale(1); cursor:not-allowed}
+        .game{margin-top:16px}
+        .hidden{display:none !important}
 
-    /* Reflex */
-    .reflex{display:grid; place-items:center; height:280px; border-radius:14px; background:#091225; border:1px dashed rgba(255,255,255,.12); padding:18px; text-align:center}
-    .reflex.ready{background:#1e293b}
-    .reflex.go{background:#064e3b}
-    .reflex h2{margin:0}
+        /* Reflex */
+        .reflex{display:grid; place-items:center; height:280px; border-radius:14px; background:#091225; border:1px dashed rgba(255,255,255,.12); padding:18px; text-align:center}
+        .reflex.ready{background:#1e293b}
+        .reflex.go{background:#064e3b}
+        .reflex h2{margin:0}
 
-    /* Simon */
-    .simon{width:min(420px, 96%); margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    .pad{height:120px; border-radius:14px; opacity:.85; border:2px solid rgba(255,255,255,.12); cursor:pointer; transition: transform .06s ease, opacity .2s, filter .06s}
-    .pad:active{transform:scale(.98)}
-    .pad.active{opacity:1; filter:brightness(2.6) saturate(1.5); box-shadow:0 0 0 10px rgba(255,255,255,.12) inset}
-    .p0{background:#b91c1c}
-    .p1{background:#b45309}
-    .p2{background:#15803d}
-    .p3{background:#1e40af}
+        /* Simon */
+        .simon{width:min(420px, 96%); margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:10px}
+        .pad{height:120px; border-radius:14px; opacity:.85; border:2px solid rgba(255,255,255,.12); cursor:pointer; transition: transform .06s ease, opacity .2s, filter .06s}
+        .pad:active{transform:scale(.98)}
+        /* aumentato contrasto quando attivo */
+        .pad.active{opacity:1; filter:brightness(2.6) saturate(1.5); box-shadow:0 0 0 10px rgba(255,255,255,.12) inset}
+        .p0{background:#b91c1c}
+        .p1{background:#b45309}
+        .p2{background:#15803d}
+        .p3{background:#1e40af}
 
-    /* Memory pairs - 16 coppie */
-    .pairs{display:grid; grid-template-columns: repeat(4, minmax(44px, 1fr)); gap:8px; max-width:960px; margin:0 auto}
-    .tile{aspect-ratio:1/1; border-radius:12px; display:grid; place-items:center; background:#0b1220; border:1px solid rgba(255,255,255,.1); font-size:16px; cursor:pointer; user-select:none; transition: transform .08s ease}
-    .tile.revealed{background:#13203a}
-    .tile.matched{background:#064e3b}
+        /* Memory pairs - 16 coppie */
+        .pairs{display:grid; grid-template-columns: repeat(4, minmax(44px, 1fr)); gap:8px; max-width:960px; margin:0 auto}
+        .tile{aspect-ratio:1/1; border-radius:12px; display:grid; place-items:center; background:#0b1220; border:1px solid rgba(255,255,255,.1); font-size:16px; cursor:pointer; user-select:none; transition: transform .08s ease}
+        .tile.revealed{background:#13203a}
+        .tile.matched{background:#064e3b}
 
-    .quiz{display:grid; gap:10px; max-width:560px;color: var(--text)}
-    .opt{padding:12px; border-radius:12px; background:#0b1220; border:1px solid rgba(255,255,255,.08); cursor:pointer;color: var(--text); }
-    .opt.correct{outline:2px solid var(--primary)}
-    .opt.wrong{outline:2px solid var(--danger)}
+        .quiz{display:grid; gap:10px; max-width:560px;color: var(--text)}
+        .opt{padding:12px; border-radius:12px; background:#0b1220; border:1px solid rgba(255,255,255,.08); cursor:pointer;color: var(--text); }
+        .opt.correct{outline:2px solid var(--primary)}
+        .opt.wrong{outline:2px solid var(--danger)}
 
-    .footer{margin-top:16px; color:var(--soft); font-size:12px}
-    .prize{display:grid; place-items:center; gap:14px; text-align:center; padding:20px; background: #081426; border-radius:16px; border:1px solid rgba(255,255,255,.08)}
-    .code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; letter-spacing: 2px; font-weight:800; background:#0b1220; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.1)}
-    .toast{position:fixed; inset:auto 0 20px 0; display:grid; place-items:center; pointer-events:none}
-    .toast .msg{pointer-events:auto; background:#0b1220; border:1px solid rgba(255,255,255,.12); padding:10px 14px; border-radius:12px; box-shadow:var(--shadow)}
+        .footer{margin-top:16px; color:var(--soft); font-size:12px}
+        .prize{display:grid; place-items:center; gap:14px; text-align:center; padding:20px; background: #081426; border-radius:16px; border:1px solid rgba(255,255,255,.08)}
+        .code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; letter-spacing: 2px; font-weight:800; background:#0b1220; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.1)}
+        .toast{position:fixed; inset:auto 0 20px 0; display:grid; place-items:center; pointer-events:none}
+        .toast .msg{pointer-events:auto; background:#0b1220; border:1px solid rgba(255,255,255,.12); padding:10px 14px; border-radius:12px; box-shadow:var(--shadow)}
 
-    .diamond{width:12px; height:16px; transform:rotate(45deg); display:block}
-  </style>
+        .diamond{width:12px; height:16px; transform:rotate(45deg); display:block}
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">🎯</div>
-        <div>
-          <h1>Gioco a Livelli – Vinci il Premio!</h1>
-          <div class="footer">Completa tutti i mini‑giochi per sbloccare il premio finale.</div>
-        </div>
-      </div>
-      <div class="progress" aria-label="Progresso">
-        <div class="bar" id="progressBar"></div>
-      </div>
-    </header>
+    <div class="wrap">
+        <header>
+            <div class="brand">
+                <div class="logo">🎯</div>
+                <div>
+                    <h1>Gioco a Livelli – Vinci il Premio!</h1>
+                    <div class="footer">Completa tutti i mini‑giochi per sbloccare il premio finale.</div>
+                </div>
+            </div>
+            <div class="progress" aria-label="Progresso">
+                <div class="bar" id="progressBar"></div>
+            </div>
+        </header>
 
-    <main class="grid" style="margin-top:16px">
-      <section class="card">
-        <h2 style="margin-top:0">Livelli</h2>
-        <div class="levels" id="levels"></div>
-        <div class="footer">Il progresso è salvato nel browser (localStorage). Puoi chiudere e tornare più tardi.</div>
-      </section>
+        <main class="grid" style="margin-top:16px">
+            <section class="card">
+                <h2 style="margin-top:0">Livelli</h2>
+                <div class="levels" id="levels"></div>
+                <div class="footer">Il progresso è salvato nel browser (localStorage). Puoi chiudere e tornare più tardi.</div>
+            </section>
 
-      <section class="card">
-        <h2 style="margin-top:0" id="gameTitle">Scegli un livello</h2>
-        <div id="gameArea" class="game"></div>
-      </section>
-    </main>
+            <section class="card">
+                <h2 style="margin-top:0" id="gameTitle">Scegli un livello</h2>
+                <div id="gameArea" class="game"></div>
+            </section>
+        </main>
 
-    <section class="card hidden" id="prizeSection" style="margin-top:16px">
-      <h2>🎉 Premio sbloccato!</h2>
-      <div class="prize">
-        <p>Congratulazioni! Hai completato tutti i livelli. Ecco il tuo premio:</p>
-        <div class="code" id="prizeCode" aria-live="polite"></div>
-        <button class="btn" id="copyCodeBtn">Copia Codice</button>
-        <small class="footer">Suggerimento: Personalizza il testo del premio o collega un form per riscattarlo.</small>
-      </div>
-    </section>
-  </div>
+        <section class="card hidden" id="prizeSection" style="margin-top:16px">
+            <h2>🎉 Premio sbloccato!</h2>
+            <div class="prize">
+                <p>Congratulazioni! Hai completato tutti i livelli. Ecco il tuo codice premio:</p>
+                <div class="code" id="prizeCode" aria-live="polite"></div>
+                <button class="btn" id="copyCodeBtn">Copia Codice</button>
+                <small class="footer">Suggerimento: Personalizza il testo del premio o collega un form per riscattarlo.</small>
+            </div>
+        </section>
+    </div>
 
-  <div class="toast" id="toast" aria-live="polite" aria-atomic="true" role="status"></div>
+    <div class="toast" id="toast" aria-live="polite" aria-atomic="true" role="status"></div>
 
-  <script>
-    const state = {
-      current: null,
-      completed: JSON.parse(localStorage.getItem('completedLevels') || '[]'),
-      prizeCode: localStorage.getItem('prizeCode') || null,
-    };
+    <script>
+        const state = {
+            current: null,
+            completed: JSON.parse(localStorage.getItem('completedLevels') || '[]'),
+            prizeCode: localStorage.getItem('prizeCode') || null,
+        };
 
-    const LEVELS = [
-      { id: 'snake', name: 'Livello 1 · Snake Diamanti', desc: 'Mangia i diamanti fino a lunghezza 30.', icon: '🐍', run: gameSnake },
-      { id: 'simon', name: 'Livello 2 · Simon 5', desc: 'Ripeti la sequenza di 5 lampeggi.', icon: '🧠', run: gameSimon },
-      { id: 'reflex', name: 'Livello 3 · Reflex Rush', desc: 'Reagisci al segnale in meno di 400ms, 3 volte (max 10 tentativi).', icon: '⚡', run: gameReflex },
-      { id: 'pairs', name: 'Livello 4 · Memory', desc: 'Abbina tutte le coppie di oggetti preziosi (8 coppie).', icon: '💎', run: gamePairs },
-      { id: 'quiz',  name: 'Livello 5 · Quick Quiz', desc: 'Rispondi correttamente alle domande.', icon: '❓', run: gameQuiz },
-    ];
+        const LEVELS = [
+            { id: 'snake', name: 'Livello 1 · Snake Diamanti', desc: 'Mangia i diamanti fino a lunghezza 30.', icon: '🐍', run: gameSnake },
+            { id: 'simon', name: 'Livello 2 · Simon 5', desc: 'Ripeti la sequenza di 5 lampeggi.', icon: '🧠', run: gameSimon },
+            { id: 'reflex', name: 'Livello 3 · Reflex Rush', desc: 'Reagisci al segnale in meno di 400ms, 3 volte (max 10 tentativi).', icon: '⚡', run: gameReflex },
+            { id: 'pairs', name: 'Livello 4 · Memory', desc: 'Abbina tutte le coppie di oggetti preziosi (8 coppie).', icon: '💎', run: gamePairs },
+            { id: 'quiz',  name: 'Livello 5 · Quick Quiz', desc: 'Rispondi correttamente alle domande.', icon: '❓', run: gameQuiz },
+        ];
 
-    function saveProgress(){ try { localStorage.setItem('completedLevels', JSON.stringify(state.completed)); } catch(e){} }
-    function showToast(text){
-      const t = document.getElementById('toast');
-      t.innerHTML = `<div class="msg">${text}</div>`;
-      setTimeout(()=> t.innerHTML = '', 1600);
-    }
-    function updateProgressUI(){
-      const bar = document.getElementById('progressBar');
-      const pct = Math.round((state.completed.length / LEVELS.length) * 100);
-      bar.style.width = pct + '%';
-    }
+        function saveProgress(){ localStorage.setItem('completedLevels', JSON.stringify(state.completed)); }
+        function showToast(text){
+            const t = document.getElementById('toast');
+            t.innerHTML = `<div class="msg">${text}</div>`;
+            setTimeout(()=> t.innerHTML = '', 1600);
+        }
+        function updateProgressUI(){
+            const bar = document.getElementById('progressBar');
+            const pct = Math.round((state.completed.length / LEVELS.length) * 100);
+            bar.style.width = pct + '%';
+        }
 
-    function renderLevels(){
-      const container = document.getElementById('levels');
-      container.innerHTML = '';
-      LEVELS.forEach((lvl, idx) => {
-        const locked = idx > 0 && !state.completed.includes(LEVELS[idx-1].id);
-        const done = state.completed.includes(lvl.id);
-        const row = document.createElement('div');
-        row.className = 'level';
-        row.innerHTML = `
-          <div style="display:flex; align-items:center; gap:12px">
-            <div style="font-size:22px">${lvl.icon}</div>
-            <div>
-              <div style="font-weight:700">${lvl.name}</div>
-              <small>${lvl.desc}</small>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px">
-            <span class="pill ${done ? 'done' : locked ? 'lock' : ''}">${done ? 'Completato' : locked ? 'Bloccato' : 'Pronto'}</span>
-            <button class="btn" ${locked ? 'disabled' : ''} aria-label="Gioca ${lvl.name}">Gioca</button>
-          </div>`;
-        row.querySelector('button').onclick = () => startLevel(lvl);
-        container.appendChild(row);
-      });
-    }
+        function renderLevels(){
+            const container = document.getElementById('levels');
+            container.innerHTML = '';
+            LEVELS.forEach((lvl, idx) => {
+                const locked = idx > 0 && !state.completed.includes(LEVELS[idx-1].id);
+                const done = state.completed.includes(lvl.id);
+                const row = document.createElement('div');
+                row.className = 'level';
+                row.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:12px">
+                        <div style="font-size:22px">${lvl.icon}</div>
+                        <div>
+                            <div style="font-weight:700">${lvl.name}</div>
+                            <small>${lvl.desc}</small>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <span class="pill ${done ? 'done' : locked ? 'lock' : ''}">${done ? 'Completato' : locked ? 'Bloccato' : 'Pronto'}</span>
+                        <button class="btn" ${locked ? 'disabled' : ''} aria-label="Gioca ${lvl.name}">Gioca</button>
+                    </div>`;
+                row.querySelector('button').onclick = () => startLevel(lvl);
+                container.appendChild(row);
+            });
+        }
 
-    function startLevel(lvl){
-      state.current = lvl.id;
-      document.getElementById('gameTitle').textContent = lvl.name;
-      const area = document.getElementById('gameArea');
-      area.innerHTML = '';
-      lvl.run(area, onCompleteLevel);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+        function startLevel(lvl){
+            state.current = lvl.id;
+            document.getElementById('gameTitle').textContent = lvl.name;
+            const area = document.getElementById('gameArea');
+            area.innerHTML = '';
+            lvl.run(area, onCompleteLevel);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-    function onCompleteLevel(id){
-      if(!state.completed.includes(id)){
-        state.completed.push(id); saveProgress(); updateProgressUI(); renderLevels();
-        showToast('✅ Livello completato!');
-      }
-      if(state.completed.length === LEVELS.length){ unlockPrize(); }
-    }
+        function onCompleteLevel(id){
+            if(!state.completed.includes(id)){
+                state.completed.push(id); saveProgress(); updateProgressUI(); renderLevels();
+                showToast('✅ Livello completato!');
+            }
+            if(state.completed.length === LEVELS.length){ unlockPrize(); }
+        }
 
-    function unlockPrize(){
-      const sec = document.getElementById('prizeSection');
-      sec.classList.remove('hidden');
-      diamondRain(220);
-      const prizeContainer = document.getElementById('prizeCode');
-      prizeContainer.textContent = '🎉 Clicca qui per riscattare il tuo premio!';
-      prizeContainer.style.color = 'var(--primary)';
-      prizeContainer.style.cursor = 'pointer';
-      prizeContainer.onclick = () => window.open('https://testairolanje-source.github.io/primo_rep/Pagine/gratta', '_blank');
-    }
+        function unlockPrize(){
+            const sec = document.getElementById('prizeSection');
+            sec.classList.remove('hidden');
+            diamondRain(220);
+            const prizeContainer = document.getElementById('prizeCode');
+            prizeContainer.innerHTML = ''; // pulisce eventuale codice
+            const link = document.createElement('a');
+            link.href = 'https://testairolanje-source.github.io/primo_rep/Pagine/gratta'; // <-- inserisci qui la tua URL
+            link.textContent = 'Clicca qui per riscattare il tuo premio!';
+            link.target = '_blank';
+            link.style.color = '#22c55e';
+            link.style.fontWeight = '700';
+            link.style.textDecoration = 'underline';
+            prizeContainer.appendChild(link);
+        }
 
-    const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
-    function playErrorTone(){ if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sawtooth'; o.frequency.value=220; g.gain.value=0.0001; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.01); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25); setTimeout(()=>{ o.stop(); }, 300); }
+        function genPrizeCode(){ const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let out = 'WIN-'; for(let i=0;i<8;i++) out += alphabet[Math.floor(Math.random()*alphabet.length)]; return out; }
 
-    function diamondRain(n=80){
-      for(let i=0;i<n;i++){
-        const s = document.createElement('div');
-        s.className = 'diamond';
-        s.textContent = '💎';
-        s.style.position='fixed'; s.style.left=Math.random()*100+'vw'; s.style.top='-30px'; s.style.zIndex=9999;
-        document.body.appendChild(s);
-        const duration = 900 + Math.random()*1200;
-        const translateX = (Math.random()*2-1)*120;
-        s.animate([
-          { transform: `translate(0px,0px) rotate(${Math.random()*360}deg)`, opacity:1 },
-          { transform: `translate(${translateX}px, 110vh) rotate(${360+Math.random()*360}deg)`, opacity:0.9 }
-        ], { duration, easing:'cubic-bezier(.2,.8,.2,1)' }).addEventListener('finish', ()=> s.remove());
-      }
-    }
+        const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
+        function playErrorTone(){ if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sawtooth'; o.frequency.value=220; g.gain.value=0.0001; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.01); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25); setTimeout(()=>{ o.stop(); }, 300); }
 
-    // ========================= GIOCHI =======================================
-    function gameSnake(root,done){
-      const canvas=document.createElement('canvas');
-      canvas.width=400; canvas.height=400; canvas.className='snake';
-      root.appendChild(canvas);
-      const ctx=canvas.getContext('2d');
-      let snake=[{x:10,y:10}],dir={x:1,y:0},food=randPos(),size=20,len=5;
-      let loop=null;
+        function diamondRain(n=80){
+            for(let i=0;i<n;i++){
+                const s = document.createElement('div');
+                s.className = 'diamond';
+                s.style.position='fixed'; s.style.left=Math.random()*100+'vw'; s.style.top='-30px'; s.style.zIndex=9999;
+                const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width','14'); svg.setAttribute('height','18'); svg.setAttribute('viewBox','0 0 14 18');
+                const path = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+                path.setAttribute('points','7,0 14,6 7,18 0,6');
+                const hue = Math.floor(Math.random()*360);
+                path.setAttribute('fill',`hsl(${hue} 80% 60%)`);
+                svg.appendChild(path);
+                s.appendChild(svg);
+                document.body.appendChild(s);
+                const duration = 900 + Math.random()*1200;
+                const translateX = (Math.random()*2-1)*120;
+                s.animate([
+                    { transform: `translate(0px,0px) rotate(${Math.random()*360}deg)`, opacity:1 },
+                    { transform: `translate(${translateX}px, 110vh) rotate(${360+Math.random()*360}deg)`, opacity:0.9 }
+                ], { duration, easing:'cubic-bezier(.2,.8,.2,1)' }).addEventListener('finish', ()=> s.remove());
+            }
+        }
 
-      const controls = document.createElement('div');
-      controls.className = 'snake-controls';
-      controls.innerHTML = `
-        <div></div>
-        <button class="btn" data-dir="up">⬆️</button>
-        <div></div>
-        <button class="btn" data-dir="left">⬅️</button>
-        <button class="btn" data-dir="down">⬇️</button>
-        <button class="btn" data-dir="right">➡️</button>
-      `;
-      root.appendChild(controls);
+        // ========================= GIOCHI =======================================
+        function gameSnake(root, done){
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 400;
+            canvas.style.backgroundColor = '#0b1220'; // Sfondo scuro per il gioco
+            canvas.style.borderRadius = '14px';
+            canvas.style.border = '1px solid rgba(255,255,255,.12)';
+            root.appendChild(canvas);
 
-      // Listener per i pulsanti a schermo
-      controls.addEventListener('click', (e) => {
-        const direction = e.target.dataset.dir;
-        if (!direction) return;
+            const ctx = canvas.getContext('2d');
+            const gridSize = 20;
+            const tileSize = canvas.width / gridSize;
 
-        if (direction === 'up' && dir.y === 0) dir = { x: 0, y: -1 };
-        else if (direction === 'down' && dir.y === 0) dir = { x: 0, y: 1 };
-        else if (direction === 'left' && dir.x === 0) dir = { x: -1, y: 0 };
-        else if (direction === 'right' && dir.x === 0) dir = { x: 1, y: 0 };
-      });
-      
-      // Listener per la tastiera (mantenuto per desktop)
-      document.onkeydown=e=>{
-        if(e.key==='ArrowUp'&&dir.y===0)dir={x:0,y:-1};
-        if(e.key==='ArrowDown'&&dir.y===0)dir={x:0,y:1};
-        if(e.key==='ArrowLeft'&&dir.x===0)dir={x:-1,y:0};
-        if(e.key==='ArrowRight'&&dir.x===0)dir={x:1,y:0};
-      };
+            let snake = [{x: 10, y: 10}];
+            let food = generateFood();
+            let direction = {x: 1, y: 0};
+            let score = 0;
+            let gameLoop;
+            const targetLength = 30;
 
-      function randPos(){return {x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}}
-      function tick(){
-        const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-        if(head.x<0||head.y<0||head.x>=20||head.y>=20||snake.some(s=>s.x===head.x&&s.y===head.y)){
-          clearInterval(loop); showToast('Game Over!'); resetGame(); return;
-        }
-        snake.unshift(head);
-        if(head.x===food.x&&head.y===food.y){ len++; food=randPos(); }
-        while(snake.length>len) snake.pop();
-        ctx.fillStyle='#000'; ctx.fillRect(0,0,400,400);
-        ctx.fillStyle='#22c55e'; snake.forEach(s=>ctx.fillRect(s.x*size,s.y*size,size-2,size-2));
-        ctx.fillStyle='#60a5fa'; ctx.fillText('💎',food.x*size+2,food.y*size+18);
-        if(len>=30){ clearInterval(loop); done('snake'); root.innerHTML='<h3>Snake completato!</h3>'; }
-      }
+            function generateFood() {
+                let newFood;
+                do {
+                    newFood = {
+                        x: Math.floor(Math.random() * gridSize),
+                        y: Math.floor(Math.random() * gridSize)
+                    };
+                } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+                return newFood;
+            }
 
-      function resetGame(){
-        snake=[{x:10,y:10}];
-        dir={x:1,y:0};
-        food=randPos();
-        len=5;
-        loop=setInterval(tick,120);
-      }
-      resetGame();
-    }
+            function draw() {
+                ctx.fillStyle = '#0b1220';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function gameReflex(root, done){
-      let successCount = 0; let attempts = 0; let waiting=false; let timeoutId=null; let started=false;
-      const targetMs = 400;
+                ctx.fillStyle = '#22c55e'; // Colore serpe
+                snake.forEach(segment => {
+                    ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize - 2, tileSize - 2);
+                });
 
-      const box = document.createElement('div'); box.className='reflex ready';
-      const txt = document.createElement('div'); txt.innerHTML = `<h2>Quando lo sfondo diventa verde, clicca subito!</h2><div class="footer">Obiettivo: 3 reazioni &lt; ${targetMs}ms — Hai ${10-attempts} tentativi rimasti</div>`;
-      const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Avvia';
-      const stats = document.createElement('div'); stats.className='footer';
-      box.append(txt, btn, stats); root.appendChild(box);
+                ctx.fillStyle = '#60a5fa'; // Colore diamante
+                ctx.font = '20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('💎', food.x * tileSize + tileSize / 2, food.y * tileSize + tileSize / 2);
 
-      function updateFooter(){ txt.querySelector('.footer').textContent = `Obiettivo: 3 reazioni < ${targetMs}ms — Hai ${10-attempts} tentativi rimasti`; }
+                ctx.fillStyle = '#e5e7eb';
+                ctx.font = '16px system-ui';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`Lunghezza: ${snake.length}`, 10, 10);
+            }
 
-      function schedule(){ waiting=true; box.classList.remove('go'); box.classList.remove('reflex-fail'); box.classList.add('ready'); const delay = 900 + Math.random()*1800; timeoutId = setTimeout(()=>{ box.classList.remove('ready'); box.classList.add('go'); waiting=false; started = performance.now(); }, delay); }
+            function update() {
+                const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
 
-      function resetGame(){ successCount=0; attempts=0; updateFooter(); stats.textContent=''; schedule(); btn.disabled=true; }
+                // Collisione con i muri
+                if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
+                    gameOver();
+                    return;
+                }
 
-      btn.onclick = resetGame;
+                // Collisione con se stessa
+                for (let i = 1; i < snake.length; i++) {
+                    if (head.x === snake[i].x && head.y === snake[i].y) {
+                        gameOver();
+                        return;
+                    }
+                }
 
-      box.onclick = ()=>{
-        if(btn.disabled !== true) return;
-        if(waiting){
-          clearTimeout(timeoutId); attempts++; playErrorTone(); stats.textContent = 'Troppo presto!'; updateFooter(); box.classList.add('reflex-fail'); if(attempts>=10){ showToast('Hai esaurito i 10 tentativi — ricomincio il livello'); resetGame(); return; } schedule();
-        } else if(started){
-          const t = Math.round(performance.now() - started);
-          stats.textContent = `Reazione: ${t}ms`;
-          if(t <= targetMs){ successCount++; showToast(`Ottimo! (${successCount}/3)`); diamondRain(80); }
-          else { attempts++; playErrorTone(); showToast('Troppo lento 😅'); updateFooter(); box.classList.add('reflex-fail'); }
-          started=false;
-          if(successCount>=3){ done('reflex'); diamondRain(140); root.replaceChildren(successUI('Livello completato!')); }
-          else if(attempts>=10){ showToast('Hai esaurito i 10 tentativi — ricomincio il livello'); resetGame(); }
-          else schedule();
-        }
-      };
-    }
+                snake.unshift(head);
 
-    function gameSimon(root, done){
-      const n = 5; const seq = Array.from({length:n}, ()=> Math.floor(Math.random()*4));
-      let playing=false; let input=[];
-      const wrap = document.createElement('div');
-      const info = document.createElement('div'); info.className='footer';
-      const grid = document.createElement('div'); grid.className='simon';
-      const pads = [0,1,2,3].map(i=>{ const d=document.createElement('div'); d.className='pad p'+i; d.setAttribute('role','button'); d.setAttribute('aria-label','Pad '+i); d.onclick=()=>press(i); grid.appendChild(d); return d; });
-      const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Mostra Sequenza';
-      wrap.append(btn, info, grid); root.appendChild(wrap);
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const frequencies = [261.6, 329.6, 392.0, 523.3];
-      function playTone(i, duration=0.3){
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.value = frequencies[i]; osc.type = 'sine'; osc.connect(gain); gain.connect(audioCtx.destination);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime + duration);
-      }
-      function playErrorTone(){
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.frequency.value = 120;
-        osc.type = 'sawtooth'; osc.connect(gain); gain.connect(audioCtx.destination); gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-      }
-      function flash(i){ pads[i].classList.add('active'); setTimeout(()=> pads[i].classList.remove('active'), 450); playTone(i); }
-      function play(){ playing=true; input=[]; info.textContent='Osserva…'; btn.disabled=true; let t=0; seq.forEach((v,idx)=> setTimeout(()=>{ flash(v); if(idx===seq.length-1){ setTimeout(()=>{ playing=false; info.textContent='Tocca a te!'; }, 450); } }, t+=700)); }
-      function press(i){ if(playing || btn.disabled!==true) return; flash(i); input.push(i); const correctSoFar = input.every((v,k)=> v===seq[k]); if(!correctSoFar){ playErrorTone(); showToast('Sequenza errata — riparti'); resetGame(); return; }
-        if(input.length===seq.length){ info.textContent='Ben fatto!'; diamondRain(120); wrap.replaceChildren(successUI('Sequenza corretta!')); done('simon'); }
-      }
-      function resetGame(){ root.innerHTML=''; gameSimon(root, done); }
-      btn.onclick = play;
-    }
+                // Mangia il cibo
+                if (head.x === food.x && head.y === food.y) {
+                    score++;
+                    showToast('🎉 Diamante raccolto! ' + (targetLength - snake.length) + ' rimasti.');
+                    food = generateFood();
+                } else {
+                    snake.pop();
+                }
 
-    function gamePairs(root, done){
-      const jewels = ['💍','📿','📯','👑','💎','📌','📏','🎀'];
-      const items = shuffle(jewels.concat(jewels));
-      const grid = document.createElement('div'); grid.className='pairs';
-      let first=null, lock=false, matched=0, wrongs=0;
+                // Controllo vittoria
+                if (snake.length >= targetLength) {
+                    clearInterval(gameLoop);
+                    done('snake');
+                    root.replaceChildren(successUI('Livello Snake completato!'));
+                    return;
+                }
 
-      items.forEach((e,idx)=>{
-        const t = document.createElement('button'); t.className='tile'; t.textContent='?'; t.style.fontSize='13px'; t.setAttribute('aria-label','Carta coperta');
-        t.onclick = ()=>{
-          if(lock || t.classList.contains('matched') || t===first) return;
-          reveal(t,e);
-          if(!first){ first=t; }
-          else{
-            lock=true;
-            if(first.dataset.v === e){ first.classList.add('matched'); t.classList.add('matched'); matched+=2; showToast('Coppia trovata!'); first=null; lock=false; if(matched===items.length){ root.replaceChildren(successUI('Tutte le coppie abbinate!')); done('pairs'); } }
-            else{ wrongs++; playErrorTone(); setTimeout(()=>{ hide(first); hide(t); first=null; lock=false; showToast(`Sbagli: ${wrongs}/5`); if(wrongs>=6){ showToast('Hai sbagliato 5 volte — ricomincio il livello'); setTimeout(()=>{ resetGame(); }, 400); } }, 700); }
-          }
-        };
-        hide(t); grid.appendChild(t);
-      });
-      root.appendChild(grid);
-      function reveal(el, v){ el.textContent = v; el.dataset.v = v; el.classList.add('revealed'); el.setAttribute('aria-label','Carta '+v); }
-      function hide(el){ el.textContent='?'; el.classList.remove('revealed'); }
-      function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-      function resetGame(){ root.innerHTML=''; gamePairs(root, done); }
-    }
+                draw();
+            }
 
-    function gameQuiz(root, done){
-      const Q = [
-        { q:`Quale è il metallo più prezioso?`, a:["Argento","Oro","Platino","Oro bianco","Titanio"], c:2 },
-        { q:`Perchè il platino è preferibile all'oro bianco?`, a:["È più resistente e mantiene il colore nel tempo","Ha un colore più brillante","Costa meno","È più leggero"], c:0 },
-        { q:`Che cosa misura il \"carato\"?`, a:["La purezza dell'oro","Il peso di una gemma (1 carato = 0.2 g)","La brillantezza di un diamante","La dimensione in millimetri"], c:1 },
-        { q:`Cosa è un lab grown diamond?`, a:[
-            "È un diamante sintetico di bassa qualità",
-            "È una scelta economica ma meno bella",
-            "È il diamante creato in laboratorio: perfetto, etico, senza impurità e senza lo sfruttamento di popolazioni per l'estrazione.",
-            "Non è un diamante vero"
-          ], c:2 }
-      ];
-      let idx=0, score=0; const wrap = document.createElement('div'); wrap.className='quiz'; const title = document.createElement('div'); title.style.fontWeight='900'; const opts = document.createElement('div'); opts.style.display='grid'; opts.style.gap='8px'; wrap.append(title, opts); root.appendChild(wrap);
+            function gameOver() {
+                clearInterval(gameLoop);
+                playErrorTone();
+                showToast('Game Over! Riprova.');
+                root.innerHTML = '';
+                gameSnake(root, done);
+            }
 
-      function render(){
-        if(idx>=Q.length){
-          root.replaceChildren(successUI('Quiz completato!')); done('quiz');
-          return;
-        }
-        const cur = Q[idx];
-        title.textContent = `Domanda ${idx+1} di ${Q.length}: ${cur.q}`;
-        opts.innerHTML = '';
-        cur.a.forEach((txt,i)=>{
-          const b = document.createElement('button'); b.className='opt'; b.textContent=txt;
-          b.onclick = ()=>{
-            if(i===cur.c){ b.classList.add('correct'); score++; showToast('Giusto!'); idx++; setTimeout(()=> render(), 300); }
-            else { b.classList.add('wrong'); playErrorTone(); showToast('Sbagliato — ricomincio il quiz');
-              setTimeout(()=>{ idx=0; score=0; wrap.replaceChildren(title, opts); render(); }, 700);
-            }
-          };
-          opts.appendChild(b);
-        });
-      }
-      render();
-    }
+            // Gestione input
+            function handleKeyDown(e) {
+                switch (e.key) {
+                    case 'ArrowUp':
+                        if (direction.y === 0) direction = {x: 0, y: -1};
+                        break;
+                    case 'ArrowDown':
+                        if (direction.y === 0) direction = {x: 0, y: 1};
+                        break;
+                    case 'ArrowLeft':
+                        if (direction.x === 0) direction = {x: -1, y: 0};
+                        break;
+                    case 'ArrowRight':
+                        if (direction.x === 0) direction = {x: 1, y: 0};
+                        break;
+                }
+            }
+            document.addEventListener('keydown', handleKeyDown);
 
-    // utility
-    function successUI(text){ const box=document.createElement('div'); box.style.display='grid'; box.style.placeItems='center'; box.style.gap='10px'; box.style.height='200px'; const h=document.createElement('div'); h.style.fontSize='18px'; h.style.fontWeight='800'; h.textContent=text; const b=document.createElement('div'); b.className='footer'; b.textContent='Puoi tornare alla lista livelli.'; box.append('✅', h, b); return box; }
+            // Avvio gioco
+            gameLoop = setInterval(update, 100);
 
-    // copia codice
-    document.getElementById('copyCodeBtn').addEventListener('click', async () => {
-      const code = document.getElementById('prizeCode').textContent;
-      if(!code) return;
-      try{ await navigator.clipboard.writeText(code); showToast('Codice copiato!'); }
-      catch{ showToast('Impossibile copiare automaticamente.'); }
-    });
+            // Cleanup alla fine del gioco
+            const observer = new MutationObserver(mutationsList => {
+                for(const mutation of mutationsList) {
+                    if (mutation.removedNodes.length > 0) {
+                        for(const node of mutation.removedNodes) {
+                            if (node === canvas) {
+                                clearInterval(gameLoop);
+                                document.removeEventListener('keydown', handleKeyDown);
+                            }
+                        }
+                    }
+                }
+            });
+            observer.observe(root, { childList: true });
+        }
 
-    // init
-    renderLevels(); updateProgressUI(); if(state.completed.length === LEVELS.length) unlockPrize();
-  </script>
+        function gameReflex(root, done){
+            // 3 successi sotto soglia per completare; max 10 tentativi totali, al 10° fallimento si ricomincia il livello
+            let successCount = 0; let attempts = 0; let waiting=false; let timeoutId=null; let started=false;
+            const targetMs = 400;
+
+            const box = document.createElement('div'); box.className='reflex ready';
+            const txt = document.createElement('div'); txt.innerHTML = `<h2>Quando lo sfondo diventa verde, clicca subito!</h2><div class="footer">Obiettivo: 3 reazioni &lt; ${targetMs}ms — Hai ${10-attempts} tentativi rimasti</div>`;
+            const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Avvia';
+            const stats = document.createElement('div'); stats.className='footer';
+            box.append(txt, btn, stats); root.appendChild(box);
+
+            function updateFooter(){ txt.querySelector('.footer').textContent = `Obiettivo: 3 reazioni < ${targetMs}ms — Hai ${10-attempts} tentativi rimasti`; }
+
+            function schedule(){ waiting=true; box.classList.remove('go'); box.classList.add('ready'); const delay = 900 + Math.random()*1800; timeoutId = setTimeout(()=>{ box.classList.remove('ready'); box.classList.add('go'); waiting=false; started = performance.now(); }, delay); }
+
+            btn.onclick = ()=>{ successCount=0; attempts=0; updateFooter(); stats.textContent=''; schedule(); btn.disabled=true; };
+
+            box.onclick = ()=>{
+                if(btn.disabled !== true) return;
+                if(waiting){ // troppo presto
+                    clearTimeout(timeoutId); attempts++; playErrorTone(); stats.textContent = 'Troppo presto!'; updateFooter(); if(attempts>=10){ showToast('Hai esaurito i 10 tentativi — ricomincio il livello'); root.innerHTML=''; return gameReflex(root, done); } schedule();
+                } else if(started){
+                    const t = Math.round(performance.now() - started);
+                    stats.textContent = `Reazione: ${t}ms`;
+                    if(t <= targetMs){ successCount++; showToast(`Ottimo! (${successCount}/3)`); diamondRain(80); }
+                    else { attempts++; playErrorTone(); showToast('Troppo lento 😅'); updateFooter(); }
+                    started=false;
+                    if(successCount>=3){ done('reflex'); diamondRain(140); root.replaceChildren(successUI('Livello completato!')); }
+                    else if(attempts>=10){ showToast('Hai esaurito i 10 tentativi — ricomincio il livello'); root.innerHTML=''; return gameReflex(root, done); }
+                    else schedule();
+                }
+            };
+        }
+
+        function gameSimon(root, done){
+            const n = 5; const seq = Array.from({length:n}, ()=> Math.floor(Math.random()*4));
+            let playing=false; let input=[];
+            const wrap = document.createElement('div');
+            const info = document.createElement('div'); info.className='footer';
+            const grid = document.createElement('div'); grid.className='simon';
+            const pads = [0,1,2,3].map(i=>{ const d=document.createElement('div'); d.className='pad p'+i; d.setAttribute('role','button'); d.setAttribute('aria-label','Pad '+i); d.onclick=()=>press(i); grid.appendChild(d); return d; });
+            const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Mostra Sequenza';
+            wrap.append(btn, info, grid); root.appendChild(wrap);
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const frequencies = [261.6, 329.6, 392.0, 523.3]; // Do, Mi, Sol, Do alto
+            function playTone(i, duration=0.3){
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.value = frequencies[i];
+                osc.type = 'sine';
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            }
+            function playErrorTone(){
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.value = 120; // tono basso
+                osc.type = 'sawtooth';
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            }
+
+            function flash(i){ pads[i].classList.add('active'); setTimeout(()=> pads[i].classList.remove('active'), 450); }
+            function play(){ playing=true; input=[]; info.textContent='Osserva…'; btn.disabled=true; let t=0; seq.forEach((v,idx)=> setTimeout(()=>{ flash(v); if(idx===seq.length-1){ setTimeout(()=>{ playing=false; info.textContent='Tocca a te!'; }, 450); } }, t+=700)); }
+            function press(i){ if(playing || btn.disabled!==true) return; flash(i); input.push(i); const correctSoFar = input.every((v,k)=> v===seq[k]); if(!correctSoFar){ playErrorTone(); showToast('Sequenza errata — riparti'); // ricomincia il gioco Simon
+                setTimeout(()=>{ root.innerHTML=''; return gameSimon(root, done); }, 500); return; }
+                if(input.length===seq.length){ info.textContent='Ben fatto!'; diamondRain(120); wrap.replaceChildren(successUI('Sequenza corretta!')); done('simon'); }
+            }
+
+            btn.onclick = play;
+        }
+
+        function gamePairs(root, done){
+            // 16 coppie (32 tessere). max 5 errori, al 5° errore ricomincia il livello
+            const jewels = ['💍','📿','📯','👑','💎','📌','📏','🎀'];
+            const items = shuffle(jewels.concat(jewels));
+            const grid = document.createElement('div'); grid.className='pairs';
+            let first=null, lock=false, matched=0, wrongs=0;
+
+            items.forEach((e,idx)=>{
+                const t = document.createElement('button'); t.className='tile'; t.textContent='?'; t.style.fontSize='13px'; t.setAttribute('aria-label','Carta coperta');
+                t.onclick = ()=>{
+                    if(lock || t.classList.contains('matched') || t===first) return;
+                    reveal(t,e);
+                    if(!first){ first=t; }
+                    else{
+                        lock=true;
+                        if(first.dataset.v === e){ first.classList.add('matched'); t.classList.add('matched'); matched+=2; showToast('Coppia trovata!'); first=null; lock=false; if(matched===items.length){ root.replaceChildren(successUI('Tutte le coppie abbinate!')); done('pairs'); } }
+                        else{ wrongs++; playErrorTone(); setTimeout(()=>{ hide(first); hide(t); first=null; lock=false; showToast(`Sbagli: ${wrongs}/5`); if(wrongs>=6){ showToast('Hai sbagliato 5 volte — ricomincio il livello'); setTimeout(()=>{ root.innerHTML=''; return gamePairs(root, done); }, 400); } }, 700); }
+                    }
+                };
+                hide(t); grid.appendChild(t);
+            });
+
+            root.appendChild(grid);
+
+            function reveal(el, v){ el.textContent = v; el.dataset.v = v; el.classList.add('revealed'); el.setAttribute('aria-label','Carta '+v); }
+            function hide(el){ el.textContent='?'; el.classList.remove('revealed'); }
+            function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+        }
+
+        function gameQuiz(root, done){
+            // Se sbagli -> ricomincia da capo
+            const Q = [
+                { q:`Achille Lauro è...`, a:["Un grande artista","Un figo","Un rimastino palloso che biascica e fa canzoni tutte identiche"], c:2 },
+                { q:`Quale è il metallo più prezioso?`, a:["Argento","Oro","Platino","Oro bianco","Titanio"], c:2 },
+                { q:`Perchè il platino è preferibile all'oro bianco?`, a:["È più resistente e mantiene il colore nel tempo","Ha un colore più brillante","Costa meno","È più leggero"], c:0 },
+                { q:`Che cosa misura il \"carato\"?`, a:["La purezza dell'oro","Il peso di una gemma (1 carato = 0.2 g)","La brillantezza di un diamante","La dimensione in millimetri"], c:1 },
+                { q:`Cosa è un lab grown diamond?`, a:[
+                        "È un diamante sintetico di bassa qualità",
+                        "È una scelta economica ma meno bella",
+                        "è la scelta migliore e più etica: il diamante creato il laboratorio è perfetto, senza impurità e non ha richiesto lo sfruttamento delle popolazioni africane per la sua estrazione.",
+                        "Non è un diamante vero"
+                    ], c:2 }
+            ];
+
+            let idx=0, score=0; const wrap = document.createElement('div'); wrap.className='quiz'; const title = document.createElement('div'); title.style.fontWeight='900'; const opts = document.createElement('div'); opts.style.display='grid'; opts.style.gap='8px'; wrap.append(title, opts); root.appendChild(wrap);
+
+            function render(){
+                // Se tutte le domande principali (prime 5) corrette allora mostra l'ultima domanda bonus
+                if(idx>=Q.length){
+                    // tutte le prime 5 corrette -> mostra domanda finale bonus
+                    const bonusQ = { q: 'Hai capito quale potrebbe essere il tuo regalo?', a:["Sì","Penso di essermi fatta un'idea","L'avevo capito dal primo gioco","Ovvio lo aspetto da 7 anni!"], c: -1 };
+                    title.textContent = `Domanda BONUS: ${bonusQ.q}`;
+                    opts.innerHTML = '';
+                    bonusQ.a.forEach((txt,i)=>{
+                        const b = document.createElement('button'); b.className='opt'; b.textContent = txt;
+                        b.onclick = ()=>{ // tutte le risposte considerate corrette
+                            showToast('Risposta accettata'); root.replaceChildren(successUI('Quiz completato!')); done('quiz'); };
+                        opts.appendChild(b);
+                    });
+                    return;
+                }
+
+                const cur = Q[idx];
+                title.textContent = `Domanda ${idx+1} di ${Q.length}: ${cur.q}`;
+                opts.innerHTML = '';
+                cur.a.forEach((txt,i)=>{
+                    const b = document.createElement('button'); b.className='opt'; b.textContent=txt;
+                    b.onclick = ()=>{
+                        if(i===cur.c){ b.classList.add('correct'); score++; showToast('Giusto!'); idx++; setTimeout(()=> render(), 300); }
+                        else { b.classList.add('wrong'); playErrorTone(); showToast('Sbagliato — ricomincio il quiz'); // ricomincia da capo
+                            setTimeout(()=>{ idx=0; score=0; wrap.replaceChildren(title, opts); render(); }, 700);
+                        }
+                    };
+                    opts.appendChild(b);
+                });
+            }
+            render();
+        }
+
+        // utility
+        function successUI(text){ const box=document.createElement('div'); box.style.display='grid'; box.style.placeItems='center'; box.style.gap='10px'; box.style.height='200px'; const h=document.createElement('div'); h.style.fontSize='18px'; h.style.fontWeight='800'; h.textContent=text; const b=document.createElement('div'); b.className='footer'; b.textContent='Puoi tornare alla lista livelli.'; box.append('✅', h, b); return box; }
+
+        // copia codice
+        document.getElementById('copyCodeBtn').addEventListener('click', async () => {
+            const code = document.getElementById('prizeCode').textContent;
+            if(!code) return;
+            try{ await navigator.clipboard.writeText(code); showToast('Codice copiato!'); }
+            catch{ showToast('Impossibile copiare automaticamente.'); }
+        });
+
+        // init
+        renderLevels(); updateProgressUI(); if(state.completed.length === LEVELS.length) unlockPrize();
+    </script>
 </body>
 </html>
