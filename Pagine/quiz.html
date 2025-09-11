@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quiz Finale</title>
+    <style>
+        :root{
+            --bg: #0f172a;
+            --text: #e5e7eb;
+            --soft: #9ca3af;
+            --primary: #22c55e;
+            --accent: #60a5fa;
+            --danger: #ef4444;
+            --radius: 18px;
+            --shadow: 0 10px 30px rgba(0,0,0,.35);
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif; background: radial-gradient(1200px 800px at 80% -10%, #1e293b 0, transparent 60%), radial-gradient(1000px 600px at -10% 110%, #111827 0, transparent 60%), var(--bg); color:var(--text); display:grid; place-items:center;}
+        .wrap{max-width:600px; padding:24px}
+        .card{background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); padding:20px}
+        .quiz{display:grid; gap:10px; max-width:560px; color: var(--text)}
+        .opt{padding:12px; border-radius:12px; background:#0b1220; border:1px solid rgba(255,255,255,.08); cursor:pointer; color: var(--text); }
+        .opt.correct{outline:2px solid var(--primary); background: rgba(34,197,94,.2);}
+        .opt.wrong{outline:2px solid var(--danger); background: rgba(239,68,68,.2);}
+        .btn{appearance:none; border:none; background:linear-gradient(135deg, var(--accent), var(--primary)); color:#06111e; font-weight:700; padding:12px 16px; border-radius:12px; cursor:pointer; transition: transform .08s ease, filter .2s ease; box-shadow: var(--shadow); width: 100%;}
+        .btn:active{transform:translateY(1px)}
+        .footer{margin-top:16px; color:var(--soft); font-size:12px; text-align:center;}
+        .toast{position:fixed; inset:auto 0 20px 0; display:grid; place-items:center; pointer-events:none}
+        .toast .msg{pointer-events:auto; background:#0b1220; border:1px solid rgba(255,255,255,.12); padding:10px 14px; border-radius:12px; box-shadow:var(--shadow)}
+
+        .diamond{width:12px; height:16px; transform:rotate(45deg); display:block}
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <section class="card">
+            <h2 style="margin-top:0">Prova Finale</h2>
+            <p>Sei stata bravissima ad arrivare fin qui, ma per conoscere il tuo regalo devi sostenere un'ultima prova, un quiz di 5 domande, se ne sbagli solo una hai perso e dovrai ricominciare tutto da capo, sei pronta?</p>
+            <div id="quizArea"></div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite" aria-atomic="true" role="status"></div>
+
+    <audio id="clap-audio" src="https://cdn.pixabay.com/audio/2023/11/17/audio_c1e3458c89.mp3"></audio>
+    <audio id="fail-audio" src="https://cdn.pixabay.com/audio/2023/07/07/audio_d1e8ce453e.mp3"></audio>
+
+    <script>
+        const Q = [
+            { q:`Achille Lauro è...`, a:["Un grande artista","Un figo","Un rimastino palloso che biascica e fa canzoni tutte identiche"], c:2 },
+            { q:`Quale è il metallo più prezioso?`, a:["Argento","Oro","Platino","Oro bianco","Titanio"], c:2 },
+            { q:`Perchè il platino è preferibile all'oro bianco?`, a:["È più resistente e mantiene il colore nel tempo","Ha un colore più brillante","Costa meno","È più leggero"], c:0 },
+            { q:`Che cosa misura il \"carato\"?`, a:["La purezza dell'oro","Il peso di una gemma (1 carato = 0.2 g)","La brillantezza di un diamante","La dimensione in millimetri"], c:1 },
+            { q:`Cosa è un lab grown diamond?`, a:[
+                    "È un diamante sintetico di bassa qualità",
+                    "È una scelta economica ma meno bella",
+                    "è la scelta migliore e più etica: il diamante creato il laboratorio è perfetto, senza impurità e non ha richiesto lo sfruttamento delle popolazioni africane per la sua estrazione.",
+                    "Non è un diamante vero"
+                ], c:2 }
+        ];
+
+        let idx = 0;
+        const quizArea = document.getElementById('quizArea');
+
+        function showToast(text){
+            const t = document.getElementById('toast');
+            t.innerHTML = `<div class="msg">${text}</div>`;
+            setTimeout(()=> t.innerHTML = '', 1600);
+        }
+
+        function playClap(){
+            const audio = document.getElementById('clap-audio');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Audio playback failed:", e));
+        }
+
+        function playFail(){
+            const audio = document.getElementById('fail-audio');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Audio playback failed:", e));
+        }
+
+        function diamondRain(n=80){
+            for(let i=0;i<n;i++){
+                const s = document.createElement('div');
+                s.className = 'diamond';
+                s.style.position='fixed'; s.style.left=Math.random()*100+'vw'; s.style.top='-30px'; s.style.zIndex=9999;
+                const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width','14'); svg.setAttribute('height','18'); svg.setAttribute('viewBox','0 0 14 18');
+                const path = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+                path.setAttribute('points','7,0 14,6 7,18 0,6');
+                path.setAttribute('fill','var(--accent)');
+                svg.appendChild(path);
+                s.appendChild(svg);
+                document.body.appendChild(s);
+                const duration = 900 + Math.random()*1200;
+                const translateX = (Math.random()*2-1)*120;
+                s.animate([
+                    { transform: `translate(0px,0px) rotate(${Math.random()*360}deg)`, opacity:1 },
+                    { transform: `translate(${translateX}px, 110vh) rotate(${360+Math.random()*360}deg)`, opacity:0.9 }
+                ], { duration, easing:'cubic-bezier(.2,.8,.2,1)' }).addEventListener('finish', ()=> s.remove());
+            }
+        }
+
+        function resetGame() {
+            localStorage.removeItem('completedLevels');
+            showToast('Hai sbagliato! Ritorna alla pagina principale e ricomincia.');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 3000);
+        }
+
+        function renderQuiz(){
+            if(idx >= Q.length) {
+                quizArea.innerHTML = `
+                    <div style="text-align:center;">
+                        <h2>Quiz completato!</h2>
+                        <p>Congratulazioni! Hai superato la prova finale.</p>
+                        <button class="btn" id="continueAdventureBtn">Prosegui la tua avventura!</button>
+                    </div>
+                `;
+                diamondRain(220);
+                document.getElementById('continueAdventureBtn').onclick = () => {
+                    window.open('https://testairolanje-source.github.io/primo_rep/Pagine/gratta', '_blank');
+                };
+                return;
+            }
+
+            const currentQ = Q[idx];
+            quizArea.innerHTML = `
+                <div class="quiz">
+                    <div style="font-weight:900;">Domanda ${idx+1} di ${Q.length}: ${currentQ.q}</div>
+                    <div id="options" style="display:grid; gap:8px;"></div>
+                </div>
+            `;
+            const optionsContainer = document.getElementById('options');
+            currentQ.a.forEach((optionText, i) => {
+                const button = document.createElement('button');
+                button.className = 'opt';
+                button.textContent = optionText;
+                button.onclick = () => {
+                    if (i === currentQ.c) {
+                        button.classList.add('correct');
+                        playClap();
+                        showToast('Giusto!');
+                        setTimeout(() => {
+                            idx++;
+                            renderQuiz();
+                        }, 1000);
+                    } else {
+                        button.classList.add('wrong');
+                        playFail();
+                        resetGame();
+                    }
+                };
+                optionsContainer.appendChild(button);
+            });
+        }
+        
+        renderQuiz();
+    </script>
+</body>
+</html>

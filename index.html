@@ -124,16 +124,18 @@
         </main>
 
         <section class="card hidden" id="prizeSection" style="margin-top:16px">
-            <h2>🎉 Premio sbloccato!</h2>
+            <h2>🎉 Prova finale sbloccata!</h2>
             <div class="prize">
-                <p>Congratulazioni! Hai completato tutti i livelli. Ora puoi proseguire la tua avventura:</p>
-                <button class="btn" id="continueAdventureBtn">Prosegui la tua avventura!</button>
-                <small class="footer">Suggerimento: Personalizza il testo del premio o collega un form per riscattarlo.</small>
+                <p>Congratulazioni, hai completato tutti i livelli!</p>
+                <button class="btn" id="goToQuizBtn">Passa alla prova finale</button>
+                <small class="footer">Preparati per l'ultima sfida!</small>
             </div>
         </section>
     </div>
 
     <div class="toast" id="toast" aria-live="polite" aria-atomic="true" role="status"></div>
+
+    <audio id="clap-audio" src="https://cdn.pixabay.com/audio/2023/11/17/audio_c1e3458c89.mp3"></audio>
 
     <script>
         const state = {
@@ -147,7 +149,7 @@
             { id: 'simon', name: 'Livello 2 · Simon 5', desc: 'Ripeti la sequenza di 5 lampeggi.', icon: '🧠', run: gameSimon },
             { id: 'reflex', name: 'Livello 3 · Reflex Rush', desc: 'Reagisci al segnale in meno di 400ms, 3 volte (max 10 tentativi).', icon: '⚡', run: gameReflex },
             { id: 'pairs', name: 'Livello 4 · Memory', desc: 'Abbina tutte le coppie di oggetti preziosi (8 coppie).', icon: '💎', run: gamePairs },
-            { id: 'quiz',  name: 'Livello 5 · Quick Quiz', desc: 'Rispondi correttamente alle domande.', icon: '❓', run: gameQuiz },
+            { id: 'quiz',  name: 'Prova Finale · Quick Quiz', desc: 'Rispondi correttamente alle domande.', icon: '❓', run: () => window.location.href = 'quiz.html' },
         ];
 
         function saveProgress(){ localStorage.setItem('completedLevels', JSON.stringify(state.completed)); }
@@ -161,12 +163,20 @@
             const pct = Math.round((state.completed.length / LEVELS.length) * 100);
             bar.style.width = pct + '%';
         }
+        function playClap(){
+            const audio = document.getElementById('clap-audio');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Audio playback failed:", e));
+        }
 
         function renderLevels(){
             const container = document.getElementById('levels');
             container.innerHTML = '';
             LEVELS.forEach((lvl, idx) => {
-                const locked = idx > 0 && !state.completed.includes(LEVELS[idx-1].id);
+                // Aggiungi un controllo per il quiz per renderlo sempre sbloccato se tutti gli altri sono completati
+                const isQuiz = lvl.id === 'quiz';
+                const allPreviousCompleted = LEVELS.slice(0, LEVELS.length - 1).every(l => state.completed.includes(l.id));
+                const locked = !isQuiz ? (idx > 0 && !state.completed.includes(LEVELS[idx-1].id)) : !allPreviousCompleted;
                 const done = state.completed.includes(lvl.id);
                 const row = document.createElement('div');
                 row.className = 'level';
@@ -188,6 +198,10 @@
         }
 
         function startLevel(lvl){
+            if(lvl.id === 'quiz') {
+                window.location.href = 'quiz.html';
+                return;
+            }
             state.current = lvl.id;
             document.getElementById('gameTitle').textContent = lvl.name;
             const area = document.getElementById('gameArea');
@@ -199,9 +213,10 @@
         function onCompleteLevel(id){
             if(!state.completed.includes(id)){
                 state.completed.push(id); saveProgress(); updateProgressUI(); renderLevels();
+                playClap();
                 showToast('✅ Livello completato!');
             }
-            if(state.completed.length === LEVELS.length){ unlockPrize(); }
+            if(state.completed.length === LEVELS.length - 1){ unlockPrize(); }
         }
 
         function unlockPrize(){
@@ -210,7 +225,6 @@
             diamondRain(220); // Avvia la pioggia di diamanti
         }
 
-        // Funzione modificata per la pioggia di diamanti (un solo colore)
         function diamondRain(n=80){
             for(let i=0;i<n;i++){
                 const s = document.createElement('div');
@@ -219,7 +233,6 @@
                 const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width','14'); svg.setAttribute('height','18'); svg.setAttribute('viewBox','0 0 14 18');
                 const path = document.createElementNS('http://www.w3.org/2000/svg','polygon');
                 path.setAttribute('points','7,0 14,6 7,18 0,6');
-                // Colore fisso per i diamanti (ad esempio, il blu dell'accento)
                 path.setAttribute('fill','var(--accent)');
                 svg.appendChild(path);
                 s.appendChild(svg);
@@ -232,7 +245,6 @@
                 ], { duration, easing:'cubic-bezier(.2,.8,.2,1)' }).addEventListener('finish', ()=> s.remove());
             }
         }
-
 
         const audioCtx = (typeof AudioContext !== 'undefined') ? new AudioContext() : null;
         function playErrorTone(){ if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sawtooth'; o.frequency.value=220; g.gain.value=0.0001; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.01); g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.25); setTimeout(()=>{ o.stop(); }, 300); }
@@ -261,7 +273,7 @@
 
             let snake = [{x: 10, y: 10}];
             let food = generateFood();
-            let direction = {x: 1, y: 0}; // Inizia andando a destra
+            let direction = {x: 1, y: 0};
             let targetLength = 30;
 
             function generateFood() {
@@ -276,16 +288,16 @@
             }
 
             function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // Pulisce il canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#0b1220';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                ctx.fillStyle = '#22c55e'; // Colore della serpe
+                ctx.fillStyle = '#22c55e';
                 snake.forEach(segment => {
                     ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize - 2, tileSize - 2);
                 });
 
-                ctx.fillStyle = '#60a5fa'; // Colore del diamante
+                ctx.fillStyle = '#60a5fa';
                 ctx.font = `${tileSize * 0.8}px serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -340,7 +352,6 @@
                 gameSnake(root, done);
             }
 
-            // Gestione input tastiera
             function handleKeyDown(e) {
                 switch (e.key) {
                     case 'ArrowUp':
@@ -359,20 +370,17 @@
             }
             document.addEventListener('keydown', handleKeyDown);
 
-            // Gestione input touch (pulsante "Gira")
             document.getElementById('snakeTurnBtn').onclick = () => {
                 const { x, y } = direction;
-                // Ruota di 90 gradi in senso orario
-                if (x === 1 && y === 0) direction = { x: 0, y: 1 };   // Destra -> Giù
-                else if (x === 0 && y === 1) direction = { x: -1, y: 0 }; // Giù -> Sinistra
-                else if (x === -1 && y === 0) direction = { x: 0, y: -1 };// Sinistra -> Su
-                else if (x === 0 && y === -1) direction = { x: 1, y: 0 };  // Su -> Destra
+                if (x === 1 && y === 0) direction = { x: 0, y: 1 };
+                else if (x === 0 && y === 1) direction = { x: -1, y: 0 };
+                else if (x === -1 && y === 0) direction = { x: 0, y: -1 };
+                else if (x === 0 && y === -1) direction = { x: 1, y: 0 };
             };
 
 
             const gameLoop = setInterval(update, 100);
 
-            // Cleanup alla fine del gioco
             const observer = new MutationObserver(mutationsList => {
                 for(const mutation of mutationsList) {
                     if (mutation.removedNodes.length > 0) {
@@ -390,7 +398,6 @@
 
 
         function gameReflex(root, done){
-            // 3 successi sotto soglia per completare; max 10 tentativi totali, al 10° fallimento si ricomincia il livello
             let successCount = 0; let attempts = 0; let waiting=false; let timeoutId=null; let started=false;
             const targetMs = 400;
 
@@ -408,7 +415,7 @@
 
             box.onclick = ()=>{
                 if(btn.disabled !== true) return;
-                if(waiting){ // troppo presto
+                if(waiting){
                     clearTimeout(timeoutId); attempts++; playErrorTone(); stats.textContent = 'Troppo presto!'; updateFooter(); if(attempts>=10){ showToast('Hai esaurito i 10 tentativi — ricomincio il livello'); root.innerHTML=''; return gameReflex(root, done); } schedule();
                 } else if(started){
                     const t = Math.round(performance.now() - started);
@@ -433,7 +440,7 @@
             const btn = document.createElement('button'); btn.className='btn'; btn.textContent='Mostra Sequenza';
             wrap.append(btn, info, grid); root.appendChild(wrap);
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const frequencies = [261.6, 329.6, 392.0, 523.3]; // Do, Mi, Sol, Do alto
+            const frequencies = [261.6, 329.6, 392.0, 523.3];
             function playTone(i, duration=0.3){
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -448,7 +455,7 @@
             function playErrorTone(){
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.frequency.value = 120; // tono basso
+                osc.frequency.value = 120;
                 osc.type = 'sawtooth';
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
@@ -459,7 +466,7 @@
 
             function flash(i){ pads[i].classList.add('active'); playTone(i); setTimeout(()=> pads[i].classList.remove('active'), 450); }
             function play(){ playing=true; input=[]; info.textContent='Osserva…'; btn.disabled=true; let t=0; seq.forEach((v,idx)=> setTimeout(()=>{ flash(v); if(idx===seq.length-1){ setTimeout(()=>{ playing=false; info.textContent='Tocca a te!'; }, 450); } }, t+=700)); }
-            function press(i){ if(playing || btn.disabled!==true) return; playTone(i); input.push(i); const correctSoFar = input.every((v,k)=> v===seq[k]); if(!correctSoFar){ playErrorTone(); showToast('Sequenza errata — riparti'); // ricomincia il gioco Simon
+            function press(i){ if(playing || btn.disabled!==true) return; playTone(i); input.push(i); const correctSoFar = input.every((v,k)=> v===seq[k]); if(!correctSoFar){ playErrorTone(); showToast('Sequenza errata — riparti');
                 setTimeout(()=>{ root.innerHTML=''; return gameSimon(root, done); }, 500); return; }
                 if(input.length===seq.length){ info.textContent='Ben fatto!'; diamondRain(120); wrap.replaceChildren(successUI('Sequenza corretta!')); done('simon'); }
             }
@@ -468,7 +475,6 @@
         }
 
         function gamePairs(root, done){
-            // 16 coppie (32 tessere). max 5 errori, al 5° errore ricomincia il livello
             const jewels = ['💍','📿','📯','👑','💎','📌','📏','🎀'];
             const items = shuffle(jewels.concat(jewels));
             const grid = document.createElement('div'); grid.className='pairs';
@@ -496,69 +502,18 @@
             function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
         }
 
-        function gameQuiz(root, done){
-            // Se sbagli -> ricomincia da capo
-            const Q = [
-                { q:`Achille Lauro è...`, a:["Un grande artista","Un figo","Un rimastino palloso che biascica e fa canzoni tutte identiche"], c:2 },
-                { q:`Quale è il metallo più prezioso?`, a:["Argento","Oro","Platino","Oro bianco","Titanio"], c:2 },
-                { q:`Perchè il platino è preferibile all'oro bianco?`, a:["È più resistente e mantiene il colore nel tempo","Ha un colore più brillante","Costa meno","È più leggero"], c:0 },
-                { q:`Che cosa misura il \"carato\"?`, a:["La purezza dell'oro","Il peso di una gemma (1 carato = 0.2 g)","La brillantezza di un diamante","La dimensione in millimetri"], c:1 },
-                { q:`Cosa è un lab grown diamond?`, a:[
-                        "È un diamante sintetico di bassa qualità",
-                        "È una scelta economica ma meno bella",
-                        "è la scelta migliore e più etica: il diamante creato il laboratorio è perfetto, senza impurità e non ha richiesto lo sfruttamento delle popolazioni africane per la sua estrazione.",
-                        "Non è un diamante vero"
-                    ], c:2 }
-            ];
-
-            let idx=0, score=0; const wrap = document.createElement('div'); wrap.className='quiz'; const title = document.createElement('div'); title.style.fontWeight='900'; const opts = document.createElement('div'); opts.style.display='grid'; opts.style.gap='8px'; wrap.append(title, opts); root.appendChild(wrap);
-
-            function render(){
-                // Se tutte le domande principali (prime 5) corrette allora mostra l'ultima domanda bonus
-                if(idx>=Q.length){
-                    // tutte le prime 5 corrette -> mostra domanda finale bonus
-                    const bonusQ = { q: 'Hai capito quale potrebbe essere il tuo regalo?', a:["Sì","Penso di essermi fatta un'idea","L'avevo capito dal primo gioco","Ovvio lo aspetto da 7 anni!"], c: -1 };
-                    title.textContent = `Domanda BONUS: ${bonusQ.q}`;
-                    opts.innerHTML = '';
-                    bonusQ.a.forEach((txt,i)=>{
-                        const b = document.createElement('button'); b.className='opt'; b.textContent = txt;
-                        b.onclick = ()=>{ // tutte le risposte considerate corrette
-                            showToast('Risposta accettata'); root.replaceChildren(successUI('Quiz completato!')); done('quiz'); };
-                        opts.appendChild(b);
-                    });
-                    return;
-                }
-
-                const cur = Q[idx];
-                title.textContent = `Domanda ${idx+1} di ${Q.length}: ${cur.q}`;
-                opts.innerHTML = '';
-                cur.a.forEach((txt,i)=>{
-                    const b = document.createElement('button'); b.className='opt'; b.textContent=txt;
-                    b.onclick = ()=>{
-                        if(i===cur.c){ b.classList.add('correct'); score++; showToast('Giusto!'); idx++; setTimeout(()=> render(), 300); }
-                        else { b.classList.add('wrong'); playErrorTone(); showToast('Sbagliato — ricomincio il quiz'); // ricomincia da capo
-                            setTimeout(()=>{ idx=0; score=0; wrap.replaceChildren(title, opts); render(); }, 700);
-                        }
-                    };
-                    opts.appendChild(b);
-                });
-            }
-            render();
-        }
-
-        // utility
         function successUI(text){ const box=document.createElement('div'); box.style.display='grid'; box.style.placeItems='center'; box.style.gap='10px'; box.style.height='200px'; const h=document.createElement('div'); h.style.fontSize='18px'; h.style.fontWeight='800'; h.textContent=text; const b=document.createElement('div'); b.className='footer'; b.textContent='Puoi tornare alla lista livelli.'; box.append('✅', h, b); return box; }
-
-        // Gestione del pulsante "Prosegui la tua avventura!"
+        
         document.getElementById('prizeSection').addEventListener('click', (event) => {
-            if (event.target && event.target.id === 'continueAdventureBtn') {
-                window.open('https://testairolanje-source.github.io/primo_rep/Pagine/gratta', '_blank');
+            if (event.target && event.target.id === 'goToQuizBtn') {
+                window.location.href = 'quiz.html';
             }
         });
 
 
-        // init
-        renderLevels(); updateProgressUI(); if(state.completed.length === LEVELS.length) unlockPrize();
+        renderLevels(); updateProgressUI();
+        const allLevelsCompleted = LEVELS.slice(0, LEVELS.length - 1).every(l => state.completed.includes(l.id));
+        if(allLevelsCompleted) unlockPrize();
     </script>
 </body>
 </html>
