@@ -1,259 +1,254 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scegli il destino</title>
-  <style>
-    body {
-      background: white;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    h1 {
-      margin: 20px auto;
-      max-width: 500px;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-    .corner {
-      position: absolute;
-      width: auto;
-      height: 45%;
-      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
-      transition: transform 0.8s ease-out, top 0.8s ease-out, left 0.8s ease-out, right 0.8s ease-out, bottom 0.8s ease-out, z-index 0s;
-      z-index: 1;
-    }
-    #top-left { top: 20px; left: 80px; }
-    #top-right { top: 20px; right: 80px; }
-    #bottom-left { bottom: 20px; left: 80px; }
-    #bottom-right { bottom: 20px; right: 80px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scegli il destino</title>
+    <style>
+        body {
+            background: white;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px auto;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .corner {
+            position: absolute;
+            width: 40vmin;
+            height: 40vmin;
+            max-width: 250px;
+            max-height: 250px;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
+            transition: transform 0.8s ease-out, top 0.8s ease-out, left 0.8s ease-out, right 0.8s ease-out, bottom 0.8s ease-out, z-index 0s;
+            z-index: 1;
+        }
+        #top-left { top: 3%; left: 3%; }
+        #top-right { top: 3%; right: 3%; }
+        #bottom-left { bottom: 3%; left: 3%; }
+        #bottom-right { bottom: 3%; right: 3%; }
+        
+        #spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 150px;
+            background: red;
+            transform-origin: bottom center;
+            transform: translate(-50%, -50%) rotate(0deg);
+            clip-path: polygon(50% 0%, 60% 100%, 40% 100%);
+            border-radius: 5px;
+            z-index: 2;
+        }
+        #chooseBtn {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            background: gold;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+        .diamond {
+            position: fixed;
+            top: -50px;
+            font-size: 24px;
+            color: deepskyblue;
+            animation: fall 3s linear forwards;
+            z-index: 3;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh); }
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            pointer-events: none;
+            transition: background 0.8s ease-out;
+            z-index: 0;
+        }
+        #overlay.active {
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: auto;
+            z-index: 2;
+        }
+        .corner.winner {
+            transform: translate(-50%, -50%) scale(1.5);
+            top: 50% !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            z-index: 3;
+        }
+        #overlay.active + #top-left,
+        #overlay.active + #top-right,
+        #overlay.active + #bottom-left,
+        #overlay.active + #bottom-right {
+            box-shadow: none;
+        }
+        #overlay.active + .corner:not(.winner) {
+            opacity: 0;
+        }
 
-    #spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 50px;
-      height: 150px;
-      background: red;
-      transform-origin: bottom center;
-      transform: translate(-50%, -50%) rotate(0deg);
-      clip-path: polygon(50% 0%, 60% 100%, 40% 100%);
-      border-radius: 5px;
-      z-index: 2;
-    }
-    #chooseBtn {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      font-size: 18px;
-      cursor: pointer;
-      background: gold;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      z-index: 2;
-    }
-    .diamond {
-      position: fixed;
-      top: -50px;
-      font-size: 24px;
-      color: deepskyblue;
-      animation: fall 3s linear forwards;
-      z-index: 3;
-    }
-    @keyframes fall {
-      to { transform: translateY(110vh); }
-    }
-
-    /* Stili per l'overlay e l'immagine vincente */
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0);
-      pointer-events: none;
-      transition: background 0.8s ease-out;
-      z-index: 0;
-    }
-    #overlay.active {
-      background: rgba(0, 0, 0, 0.7);
-      pointer-events: auto;
-      z-index: 2;
-    }
-    .corner.winner {
-      transform: translate(-50%, -50%) scale(1.5);
-      top: 50% !important;
-      left: 50% !important;
-      right: auto !important;
-      bottom: auto !important;
-      z-index: 3;
-    }
-
-    /* NUOVI STILI PER IL POPUP */
-    #welcomePopup {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9); /* Sfondo scuro per il popup */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 100; /* Assicurati che sia sopra tutto */
-      color: white;
-      text-align: center;
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
-    }
-    #welcomePopup.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none; /* Rende il popup non cliccabile quando nascosto */
-    }
-    #popupContent {
-      background: rgba(255, 255, 255, 0.1); /* Sfondo leggermente trasparente per il contenuto */
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 500px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    #popupContent p {
-      font-size: 1.3em;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-    #popupContent button {
-      padding: 15px 30px;
-      font-size: 1.1em;
-      background: gold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s ease;
-    }
-    #popupContent button:hover {
-      background: darkgoldenrod;
-    }
-    /* Rimuovi la box-shadow per gli elementi non vincenti quando l'overlay è attivo */
-    #overlay.active + #top-left:not(.winner),
-    #overlay.active + #top-right:not(.winner),
-    #overlay.active + #bottom-left:not(.winner),
-    #overlay.active + #bottom-right:not(.winner) {
-      box-shadow: none;
-    }
-  </style>
+        /* Nuovi stili per il popup */
+        #welcomePopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: white;
+            text-align: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+            opacity: 1;
+            visibility: visible;
+        }
+        #welcomePopup.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #popupContent {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+        #popupContent p {
+            font-size: 1.3em;
+            line-height: 1.6;
+            margin: 0 0 20px 0;
+        }
+        #popupContent button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            background: gold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s ease;
+        }
+        #popupContent button:hover {
+            background: darkgoldenrod;
+        }
+    </style>
 </head>
 <body>
-  <div id="welcomePopup">
-    <div id="popupContent">
-      <p>A tutti piacciono i giochi, ma certamente quelli che piacciono di più a te sono quelli d'azzardo, perciò eccoti il tuo regalo, ben 8 gratta e vinci, chissà che non vinci qualcosa.."</p>
-      <button id="closePopupBtn">Inizia a scegliere!</button>
+    <div id="welcomePopup">
+        <div id="popupContent">
+            <p>A tutti piacciono i giochi, ma certamente quelli che piacciono di più a te sono quelli d'azzardo, perciò eccoti il tuo regalo, ben 8 gratta e vinci, chissà che non vinci qualcosa.."</p>
+            <button id="closePopupBtn">Inizia a scegliere!</button>
+        </div>
     </div>
-  </div>
 
-  <h1>Ero indeciso tra questi 4 quindi sarà il fato a scegliere per noi, VAI!</h1>
+    <h1>Ero indeciso tra questi 4 quindi sarà il fato a scegliere per noi</h1>
+    <div id="overlay"></div>
+    <img id="top-left" class="corner" src="Assets/cuoremix.png">
+    <img id="top-right" class="corner" src="Assets/flomix.png">
+    <img id="bottom-left" class="corner" src="Assets/trilomix.png">
+    <img id="bottom-right" class="corner" src="Assets/delimix.png">
+    <div id="spinner"></div>
+    <button id="chooseBtn" disabled>Scegli per me</button>
+    <audio id="victorySound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
 
-  <div id="overlay"></div>
+    <script>
+        const spinner = document.getElementById("spinner");
+        const btn = document.getElementById("chooseBtn");
+        const sound = document.getElementById("victorySound");
+        const overlay = document.getElementById("overlay");
+        const welcomePopup = document.getElementById("welcomePopup");
+        const closePopupBtn = document.getElementById("closePopupBtn");
 
-  <img id="top-left" class="corner" src="Assets/cuoremix.png">
-  <img id="top-right" class="corner" src="Assets/flomix.png">
-  <img id="bottom-left" class="corner" src="Assets/trilomix.png">
-  <img id="bottom-right" class="corner" src="Assets/delimix.png">
+        const corners = {
+            0: document.getElementById("top-left"),
+            1: document.getElementById("top-right"),
+            2: document.getElementById("bottom-right"),
+            3: document.getElementById("bottom-left")
+        };
 
-  <div id="spinner"></div>
-  <button id="chooseBtn" disabled>Scegli per me</button> <audio id="victorySound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
-
-  <script>
-    const spinner = document.getElementById("spinner");
-    const btn = document.getElementById("chooseBtn");
-    const sound = document.getElementById("victorySound");
-    const overlay = document.getElementById("overlay");
-    const welcomePopup = document.getElementById("welcomePopup");
-    const closePopupBtn = document.getElementById("closePopupBtn");
-
-    const corners = {
-      0: document.getElementById("top-left"),
-      1: document.getElementById("top-right"),
-      2: document.getElementById("bottom-right"),
-      3: document.getElementById("bottom-left")
-    };
-
-    // Funzione per avviare l'animazione della trottola
-    function startSpinnerAnimation() {
-        btn.disabled = true; // Disabilita il pulsante durante l'animazione
-
-        // Reset visivo
-        Object.values(corners).forEach(img => {
-            img.classList.remove('winner');
-            img.style.zIndex = '1'; // Resetta z-index per le immagini
-        });
-        overlay.classList.remove('active');
-        spinner.style.transition = "none";
-        spinner.style.transform = `translate(-50%, -50%) rotate(0deg)`;
-
-        setTimeout(() => {
-            const initialRotation = Math.floor(Math.random() * 4) * 90;
-            spinner.style.transform = `translate(-50%, -50%) rotate(${initialRotation}deg)`;
-
+        function startSpinnerAnimation() {
+            btn.disabled = true;
+            Object.values(corners).forEach(img => {
+                img.classList.remove('winner');
+                img.style.zIndex = '1';
+                img.style.opacity = '1';
+            });
+            overlay.classList.remove('active');
+            spinner.style.transition = "none";
+            spinner.style.transform = `translate(-50%, -50%) rotate(0deg)`;
+            
             setTimeout(() => {
-                const spins = Math.floor(Math.random() * 4);
-                const targetQuadrantIndex = Math.floor(Math.random() * 4);
-                const rotationOffset = 45;
-
-                const finalDeg = 360 * 5 + initialRotation + (targetQuadrantIndex * 90) + rotationOffset + (Math.random() * 20 - 10);
+                const initialRotation = Math.floor(Math.random() * 4) * 90;
+                spinner.style.transform = `translate(-50%, -50%) rotate(${initialRotation}deg)`;
                 
-                spinner.style.transition = "transform 4s ease-out";
-                spinner.style.transform = `translate(-50%, -50%) rotate(${finalDeg}deg)`;
-
                 setTimeout(() => {
-                    btn.disabled = false; // Riabilita il pulsante alla fine
-                    overlay.classList.add('active');
-
-                    const winningImage = corners[targetQuadrantIndex];
-                    if (winningImage) {
-                        winningImage.classList.add('winner');
-                        winningImage.style.zIndex = '3';
-                    }
+                    const targetQuadrantIndex = Math.floor(initialRotation / 90);
+                    const finalDeg = 360 * 5 + initialRotation + (targetQuadrantIndex * 90) + 45 + (Math.random() * 20 - 10);
                     
-                    makeDiamonds();
-                    sound.play();
-                }, 4200);
-            }, 50);
-        }, 100);
-    }
+                    spinner.style.transition = "transform 4s ease-out";
+                    spinner.style.transform = `translate(-50%, -50%) rotate(${finalDeg}deg)`;
+                    
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        overlay.classList.add('active');
+                        const winningImage = corners[targetQuadrantIndex];
+                        if (winningImage) {
+                            winningImage.classList.add('winner');
+                            winningImage.style.zIndex = '3';
+                        }
+                        makeDiamonds();
+                        sound.play();
+                    }, 4200);
+                }, 50);
+            }, 100);
+        }
 
-    // Event Listener per il pulsante "Scegli per me"
-    btn.addEventListener("click", startSpinnerAnimation);
+        function makeDiamonds() {
+            for (let i = 0; i < 30; i++) {
+                const d = document.createElement("div");
+                d.className = "diamond";
+                d.style.left = Math.random() * 100 + "vw";
+                d.innerHTML = "💎";
+                document.body.appendChild(d);
+                setTimeout(() => d.remove(), 3000);
+            }
+        }
+        
+        // Attiva il pulsante per avviare il gioco solo dopo aver chiuso il popup
+        closePopupBtn.addEventListener("click", () => {
+            welcomePopup.classList.add("hidden");
+            btn.disabled = false;
+        });
 
-    // Event Listener per il pulsante del popup
-    closePopupBtn.addEventListener("click", () => {
-      welcomePopup.classList.add("hidden"); // Nasconde il popup
-      btn.disabled = false; // Abilita il pulsante della trottola
-    });
+        // Event Listener per il pulsante "Scegli per me"
+        btn.addEventListener("click", startSpinnerAnimation);
 
-    function makeDiamonds() {
-      for (let i = 0; i < 30; i++) {
-        const d = document.createElement("div");
-        d.className = "diamond";
-        d.style.left = Math.random() * 100 + "vw";
-        d.innerHTML = "💎";
-        document.body.appendChild(d);
-        setTimeout(() => d.remove(), 3000);
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
