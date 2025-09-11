@@ -217,7 +217,7 @@
                     setTimeout(() => {
                         btn.disabled = false;
                         overlay.classList.add('active');
-                        const winningImage = corners[targetQuadrantIndex];
+                        const winningImage = corners[targetQuadrantIndex+90];
                         if (winningImage) {
                             winningImage.classList.add('winner');
                             winningImage.style.zIndex = '3';
