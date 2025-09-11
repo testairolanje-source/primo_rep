@@ -554,58 +554,172 @@
             function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
         }
 
-        function gameLingo(root, done){
+        function gameLingo(root, done) {
             const words = {
-                5:["cielo","luce","sogno","muro","piano"],
-                6:["notare","stella","maree","soleil","mentre"],
-                7:["viaggio","cultura","pensare","amabile","animale"],
-                8:["splendida","fantasia","avventura","tramonto","fratello"]
+                5: ["cielo", "luce", "sogno", "muro", "piano", "sassi", "amore", "cuore"],
+                6: ["notare", "stella", "maree", "soleil", "mentre", "brillo", "fabbri"],
+                7: ["viaggio", "cultura", "pensare", "amabile", "animale", "faccina", "fabbro"],
+                8: ["splendida", "fantasia", "avventura", "tramonto", "fratello", "capanna"]
             };
 
-            let stage = 5; // parola da 5, poi 6,7,8
+            let stage = 5; // Start with 5-letter words
             let currentWord = pickWord(stage);
+            let attempts = 0;
+            const maxAttempts = 5;
 
-            const box = document.createElement('div');
+            const gameContainer = document.createElement('div');
+            gameContainer.style.display = 'flex';
+            gameContainer.style.flexDirection = 'column';
+            gameContainer.style.gap = '10px';
+            gameContainer.style.maxWidth = '400px';
+            gameContainer.style.margin = '0 auto';
+
+            const grid = document.createElement('div');
+            grid.style.display = 'grid';
+            grid.style.gap = '5px';
+
             const input = document.createElement('input');
-            input.maxLength=8; input.className='tile'; input.style.width='100%';
-            const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Invia';
-            const info=document.createElement('div'); info.className='footer';
-            box.append(input,btn,info);
-            root.appendChild(box);
+            input.type = 'text';
+            input.maxLength = stage;
+            input.style.textTransform = 'uppercase';
+            input.style.fontSize = '2em';
+            input.style.padding = '8px';
+            input.style.border = '1px solid #333';
+            input.style.borderRadius = '8px';
+            input.style.textAlign = 'center';
+            input.style.background = '#0b1220';
+            input.style.color = '#e5e7eb';
+            input.style.letterSpacing = '5px';
 
-            function pickWord(len){
-                const arr=words[len]; return arr[Math.floor(Math.random()*arr.length)];
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.textContent = 'Invia';
+
+            const info = document.createElement('div');
+            info.className = 'footer';
+            
+            gameContainer.append(grid, input, btn, info);
+            root.appendChild(gameContainer);
+
+            function pickWord(len) {
+                const arr = words[len];
+                return arr[Math.floor(Math.random() * arr.length)];
             }
-            function resetGame(){
-                stage=5;
-                currentWord=pickWord(stage);
-                input.value='';
-                info.textContent=`Indovina la parola di ${stage} lettere.`;
+
+            function createGrid() {
+                grid.innerHTML = '';
+                grid.style.gridTemplateColumns = `repeat(${stage}, 1fr)`;
+                for (let i = 0; i < maxAttempts * stage; i++) {
+                    const tile = document.createElement('div');
+                    tile.style.width = '100%';
+                    tile.style.aspectRatio = '1 / 1';
+                    tile.style.border = '2px solid #333';
+                    tile.style.display = 'grid';
+                    tile.style.placeItems = 'center';
+                    tile.style.fontSize = '2em';
+                    tile.style.fontWeight = 'bold';
+                    tile.style.color = '#e5e7eb';
+                    tile.style.borderRadius = '8px';
+                    grid.appendChild(tile);
+                }
             }
-            function nextStage(){
-                if(stage===8){
+
+            function updateGrid(guess) {
+                const tiles = grid.children;
+                const correctLetters = currentWord.split('');
+                const guessLetters = guess.split('');
+                const checkedLetters = new Array(stage).fill(false);
+                
+                // First pass: mark correct position letters (green)
+                for (let i = 0; i < stage; i++) {
+                    if (guessLetters[i] === correctLetters[i]) {
+                        tiles[attempts * stage + i].style.background = '#065f46'; // Green
+                        tiles[attempts * stage + i].style.border = '2px solid #065f46';
+                        tiles[attempts * stage + i].textContent = guessLetters[i].toUpperCase();
+                        checkedLetters[i] = true;
+                        correctLetters[i] = null; // Mark as used
+                    }
+                }
+
+                // Second pass: mark correct letters in wrong position (yellow)
+                for (let i = 0; i < stage; i++) {
+                    if (!checkedLetters[i]) {
+                        const correctIndex = correctLetters.findIndex(letter => letter === guessLetters[i]);
+                        if (correctIndex !== -1) {
+                            tiles[attempts * stage + i].style.background = '#b45309'; // Yellow
+                            tiles[attempts * stage + i].style.border = '2px solid #b45309';
+                            tiles[attempts * stage + i].textContent = guessLetters[i].toUpperCase();
+                            correctLetters[correctIndex] = null; // Mark as used
+                        } else {
+                            tiles[attempts * stage + i].style.background = '#333'; // Grey
+                            tiles[attempts * stage + i].style.border = '2px solid #333';
+                            tiles[attempts * stage + i].textContent = guessLetters[i].toUpperCase();
+                        }
+                    }
+                }
+            }
+
+            function resetGame() {
+                attempts = 0;
+                stage = 5;
+                currentWord = pickWord(stage);
+                input.maxLength = stage;
+                input.value = '';
+                createGrid();
+                info.textContent = `Indovina la parola di ${stage} lettere.`;
+            }
+
+            function nextStage() {
+                if (stage === 8) {
                     root.replaceChildren(successUI('Hai completato tutte le parole!'));
                     done('lingo');
                 } else {
                     stage++;
-                    currentWord=pickWord(stage);
-                    input.value='';
-                    info.textContent=`Bravo! Ora parola di ${stage} lettere.`;
+                    currentWord = pickWord(stage);
+                    attempts = 0;
+                    input.maxLength = stage;
+                    input.value = '';
+                    createGrid();
+                    info.textContent = `Hai indovinato! Ora una parola di ${stage} lettere.`;
+                    diamondRain(80);
                 }
             }
 
-            btn.onclick=()=>{
-                const guess=input.value.toLowerCase().trim();
-                if(guess.length!==stage){ showToast(`Deve essere di ${stage} lettere`); return; }
-                if(guess===currentWord){
-                    diamondRain(80);
-                    nextStage();
-                } else {
-                    playErrorTone();
-                    showToast('❌ Sbagliato, ricominci da capo');
-                    resetGame();
+            btn.onclick = () => {
+                const guess = input.value.toLowerCase().trim();
+                if (guess.length !== stage) {
+                    showToast(`La parola deve essere di ${stage} lettere.`);
+                    return;
                 }
+
+                attempts++;
+                updateGrid(guess);
+
+                if (guess === currentWord) {
+                    playClap();
+                    setTimeout(() => {
+                        nextStage();
+                    }, 1500);
+                } else if (attempts >= maxAttempts) {
+                    playErrorTone();
+                    info.textContent = `Hai perso! La parola era "${currentWord.toUpperCase()}". Riprova.`;
+                    input.disabled = true;
+                    setTimeout(() => {
+                        resetGame();
+                        input.disabled = false;
+                    }, 3000);
+                } else {
+                    info.textContent = `Sbagliato. Hai ${maxAttempts - attempts} tentativi rimasti.`;
+                }
+                input.value = '';
+                input.focus();
             };
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    btn.click();
+                }
+            });
 
             resetGame();
         }
