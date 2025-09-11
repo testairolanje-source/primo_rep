@@ -209,7 +209,7 @@
                 
                 setTimeout(() => {
                     const targetQuadrantIndex = Math.floor(initialRotation / 90);
-                    const finalDeg = 360 * 5 + initialRotation + (targetQuadrantIndex * 90) + 45 + (Math.random() * 20 - 10);
+                    const finalDeg = 360 * 20 + (targetQuadrantIndex * 90) + 45 + (Math.random() * 20 - 10);
                     
                     spinner.style.transition = "transform 4s ease-out";
                     spinner.style.transform = `translate(-50%, -50%) rotate(${finalDeg}deg)`;
