@@ -207,7 +207,7 @@
 
         function startLevel(lvl){
             if(lvl.id === 'quiz') {
-                window.location.href = 'gratta.html';
+                window.location.href = 'Pagine/gratta.html';
                 return;
             }
             state.current = lvl.id;
@@ -224,7 +224,7 @@
                 playClap();
                 showToast('✅ Livello completato!');
             }
-            if(state.completed.length === LEVELS.length - 1){ unlockPrize(); }
+            if(state.completed.length === LEVELS.length){ unlockPrize(); }
         }
 
         function unlockPrize(){
@@ -745,7 +745,7 @@
         
         document.getElementById('prizeSection').addEventListener('click', (event) => {
             if (event.target && event.target.id === 'goToQuizBtn') {
-                window.location.href = 'gratta.html';
+                window.location.href = 'Pagine/gratta.html';
             }
         });
 
