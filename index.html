@@ -148,8 +148,8 @@
 
         
         const LEVELS = [
-            { id: 'snake', name: 'Livello 1 · Snake Diamanti', desc: 'Mangia i diamanti fino a lunghezza 30.', icon: '🐍', run: gameSnake },
-            { id: 'simon', name: 'Livello 2 · Simon Marathon', desc: 'Supera 7 sequenze (da 4 a 10 passi).', icon: '🧠', run: gameSimon },
+            { id: 'snake', name: 'Livello 1 · Snake', desc: 'Mangia i diamanti fino a lunghezza 30.', icon: '🐍', run: gameSnake },
+            { id: 'simon', name: 'Livello 2 · Simon Marathon', desc: 'Supera 5 sequenze (da 4 a 8 passi).', icon: '🧠', run: gameSimon },
             { id: 'reflex', name: 'Livello 3 · Reflex Rush', desc: 'Reagisci al segnale in meno di 400ms, 3 volte (max 10 tentativi).', icon: '⚡', run: gameReflex },
             { id: 'pairs', name: 'Livello 4 · Memory', desc: 'Abbina tutte le coppie di oggetti preziosi (8 coppie).', icon: '💎', run: gamePairs },
             { id: 'lingo', name: 'Prova Finale · Lingo', desc: 'Indovina 4 parole crescenti (5→8 lettere).', icon: '🔤', run: gameLingo },
@@ -487,7 +487,7 @@
                 const length = 4 + level; // sequenza da 4..10
                 seq = Array.from({length}, ()=> Math.floor(Math.random()*4));
                 input = [];
-                info.textContent=`Round ${level+1}/7: Osserva…`;
+                info.textContent=`Round ${level+1}/5: Osserva…`;
                 btn.disabled=true;
                 let t=0;
                 seq.forEach((v,idx)=>setTimeout(()=>{
@@ -512,12 +512,12 @@
                 }
                 if(input.length===seq.length){
                     level++;
-                    if(level>=7){
+                    if(level>=5){
                         diamondRain(140);
-                        wrap.replaceChildren(successUI('Hai completato tutti i 7 round!'));
+                        wrap.replaceChildren(successUI('Hai completato tutti i 5 round!'));
                         done('simon');
                     } else {
-                        showToast(`✅ Round ${level}/7 completato!`);
+                        showToast(`✅ Round ${level}/5 completato!`);
                         setTimeout(()=>{startRound();},1000);
                     }
                 }
